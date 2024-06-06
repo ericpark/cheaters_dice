@@ -130,3 +130,5 @@ local_constants.dart
 firebase-debug.log
 firebase.json
 **/venv/
+**/.venv/
+**/__pycache__/
