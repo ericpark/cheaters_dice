@@ -1,0 +1,23 @@
+targets:
+  $default:
+    builders:
+      source_gen:combining_builder:
+        options:
+          ignore_for_file:
+            - implicit_dynamic_parameter
+          build_extensions:
+            'lib/{{path}}/{{file}}.dart': 'lib/{{path}}/generated/{{file}}.g.dart'
+      firestore_converter_generator:
+        enabled: true
+        options: 
+          build_extensions: {'lib/src/models/{{}}.dart': ['lib/src/models/generated/{{}}.firestore_converter.dart']}
+      json_serializable:
+        options:
+          field_rename: snake
+          checked: true
+          explicit_to_json: true
+      freezed:
+        options:
+          copy_with: true
+          build_extensions:
+            'lib/{{path}}/{{file}}.dart': 'lib/{{path}}/generated/{{file}}.freezed.dart'

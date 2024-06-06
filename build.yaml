@@ -1,0 +1,62 @@
+targets:
+  cheaters_dice:
+    sources:
+      include:
+        - lib/**       
+        - pubspec.*
+        - $package$
+      exclude:
+        - lib/**/generated/**
+        - packages/**
+    dependencies:
+      - game_repository:game_repository
+    builders:
+      source_gen:combining_builder:
+        enabled: true
+        options:
+          ignore_for_file:
+            - implicit_dynamic_parameter
+          build_extensions:
+            'lib/{{path}}/{{file}}.dart': 'lib/{{path}}/generated/{{file}}.g.dart'
+      json_serializable:
+        options:
+          field_rename: snake
+          checked: true
+          explicit_to_json: true
+      freezed:
+        enabled: true
+        options:
+          copy_with: true
+          build_extensions:
+            'lib/{{path}}/{{file}}.dart': 'lib/{{path}}/generated/{{file}}.freezed.dart'
+  game_repository:
+    sources:
+      include:
+        - packages/game_repository/lib/src/models/**
+      exclude:
+        - packages/**/*.g.dart
+        - packages/**/*.freezed.dart
+        - packages/**/*.firestore_converter.dart
+    builders:
+      source_gen:combining_builder:
+        options:
+          ignore_for_file:
+            - implicit_dynamic_parameter
+          build_extensions: {'lib/src/models/{{}}.dart': ['lib/src/models/generated/{{}}.g.dart']}
+      firestore_converter_generator:
+        enabled: true
+        options: 
+          build_extensions: {'lib/src/models/{{}}.dart': ['lib/src/models/generated/{{}}.firestore_converter.dart']}
+      freezed:freezed:
+        enabled: true
+        options: 
+          build_extensions: {'lib/src/models/{{}}.dart': ['lib/src/models/generated/{{}}.freezed.dart']}
+      json_serializable:
+        options:
+          field_rename: snake
+          checked: true
+          explicit_to_json: true
+global_options:
+  freezed:freezed:
+    runs_before:
+      - build_resolvers:transitive_digests
