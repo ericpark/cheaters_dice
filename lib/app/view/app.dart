@@ -4,6 +4,7 @@ import 'package:cheaters_dice/game/game.dart';
 import 'package:cheaters_dice/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 class App extends StatelessWidget {
   const App({
@@ -18,6 +19,7 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FlutterNativeSplash.remove();
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider.value(value: _authRepository),

@@ -20,42 +20,45 @@ class GameView extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(),
-          body: SizedBox.expand(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  flex: 9,
-                  child: SizedBox.expand(
-                    child: Center(
-                      child: PlayersLayout(
-                        players: context.read<GameBloc>().playerOrder.isNotEmpty
-                            ? context.read<GameBloc>().playerOrder
-                            : [],
+          body: SafeArea(
+            child: SizedBox.expand(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    flex: 9,
+                    child: SizedBox.expand(
+                      child: Center(
+                        child: PlayersLayout(
+                          players:
+                              context.read<GameBloc>().playerOrder.isNotEmpty
+                                  ? context.read<GameBloc>().playerOrder
+                                  : [],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 100),
-                  child: Divider(),
-                ),
-                Expanded(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: state.players['player_1']!.dice
-                            .map((d) => Dice(value: d.value))
-                            .toList(),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 100),
+                    child: Divider(),
+                  ),
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: state.players['player_1']!.dice
+                              .map((d) => Dice(value: d.value))
+                              .toList(),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const Expanded(flex: 2, child: PlayerActions()),
-              ],
+                  const Expanded(flex: 2, child: PlayerActions()),
+                ],
+              ),
             ),
           ),
           floatingActionButton: Column(
