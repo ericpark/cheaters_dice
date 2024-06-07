@@ -38,7 +38,13 @@ class PlayerSubmitBidGameEvent extends GameEvent {
   const PlayerSubmitBidGameEvent();
 }
 
-class PlayerLiarGameEvent extends GameEvent {}
+class PlayerSubmitLiarGameEvent extends GameEvent {
+  const PlayerSubmitLiarGameEvent();
+}
+
+class PlayerSubmitSpotOnGameEvent extends GameEvent {
+  const PlayerSubmitSpotOnGameEvent();
+}
 
 class TurnCompleted extends GameEvent {}
 

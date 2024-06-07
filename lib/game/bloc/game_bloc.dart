@@ -26,12 +26,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<PlayerActionGameEvent>(_onPlayerAction);
     on<PlayerUpdateUserBidGameEvent>(_onPlayerUpdateBid);
     on<PlayerSubmitBidGameEvent>(_onPlayerSubmitBid);
-    on<PlayerLiarGameEvent>(_onPlayerLiar);
+    on<PlayerSubmitLiarGameEvent>(_onPlayerLiar);
+    on<PlayerSubmitSpotOnGameEvent>(_onPlayerSpotOn);
   }
 
   final GameRepository _gameRepository;
 
   StreamSubscription<DocumentSnapshot<Game>>? _gameStream;
+  static const userId = 'player_1';
 
   void init() {
     add(GameStart());
@@ -59,7 +61,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final players = updatedGame.tableOrder
         .map((playerId) => updatedGame.players[playerId]!)
         .toList();
-
     final totalDice = players.fold<int>(
       0,
       (previousValue, player) => previousValue + player.dice.length,
@@ -67,7 +68,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(
       updatedGame.copyWith(
         totalDice: totalDice,
-        userBid: state.userBid,
+        userBid: updatedGame.currentBid,
       ),
     );
   }
@@ -75,7 +76,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   FutureOr<void> _onRoundStart(event, Emitter<GameState> emit) {
     emit(
       state.copyWith(
-        status: GameStatus.success,
+        status: GameStatus.playing,
         //totalDice: 10,
         userBid: Bid.minimum(),
         // order: order,
@@ -84,7 +85,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   FutureOr<void> _onPlayerAction(event, Emitter<GameState> emit) {
-    emit(state.copyWith(status: GameStatus.success));
+    emit(state.copyWith(status: GameStatus.playing));
   }
 
   FutureOr<void> _onPlayerUpdateBid(
@@ -139,7 +140,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       ),
       playerId: state.order[state.turn % state.order.length],
       round: state.round,
-      turn: state.turn % state.order.length,
+      turn: state.turn,
       gameId: '46hOQ2pQ26C4aIx6iAWF',
     );
 
@@ -153,26 +154,49 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       state.copyWith(
         currentBid: updatedBid,
         userBid: updatedBid,
-        turn: (state.turn + 1) % state.order.length,
+        turn: state.turn + 1,
       ),
     );
   }
 
-  FutureOr<void> _onPlayerLiar(event, Emitter<GameState> emit) {
-    emit(state.copyWith(status: GameStatus.success));
+  FutureOr<void> _onPlayerLiar(event, Emitter<GameState> emit) async {
+    final newAction = game_repository.Action(
+      actionType: game_repository.ActionType.challenge,
+      playerId: state.order[state.turn % state.order.length],
+      round: state.round,
+      turn: state.turn,
+      gameId: '46hOQ2pQ26C4aIx6iAWF',
+    );
+
+    final success =
+        await _gameRepository.addPlayerAction(playerAction: newAction);
+
+    //Do not emit if there's an error.
+    if (!success) return;
+
+    emit(
+      state.copyWith(turn: 0, round: state.round + 1, userBid: Bid.minimum()),
+    );
   }
 
-  List<Player> get playerOrder {
-    const userId = 'player_1';
-    if (state.order.isEmpty) return [];
-    final index = state.order.indexOf(userId);
+  FutureOr<void> _onPlayerSpotOn(event, Emitter<GameState> emit) async {
+    final newAction = game_repository.Action(
+      actionType: game_repository.ActionType.spot,
+      playerId: state.order[state.turn % state.order.length],
+      round: state.round,
+      turn: state.turn,
+      gameId: '46hOQ2pQ26C4aIx6iAWF',
+    );
 
-    final order = state.order.sublist(index + 1)
-      ..addAll(state.order.sublist(0, index));
+    final success =
+        await _gameRepository.addPlayerAction(playerAction: newAction);
 
-    final players = order.map((playerId) => state.players[playerId]!).toList();
+    //Do not emit if there's an error.
+    if (!success) return;
 
-    return players;
+    emit(
+      state.copyWith(turn: 0, round: state.round + 1, userBid: Bid.minimum()),
+    );
   }
 
   bool canIncrementBidValue() {
@@ -230,5 +254,17 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     if (lowerBid == currentBid) return currentBid;
 
     return lowerBid;
+  }
+
+  List<Player> get playerOrder {
+    if (state.order.isEmpty) return [];
+    final index = state.tableOrder.indexOf(userId);
+
+    final order = state.tableOrder.sublist(index + 1)
+      ..addAll(state.tableOrder.sublist(0, index));
+
+    final players = order.map((playerId) => state.players[playerId]!).toList();
+
+    return players;
   }
 }

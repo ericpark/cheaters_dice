@@ -47,11 +47,7 @@ class GameView extends StatelessWidget {
                     child: Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: context
-                            .read<GameBloc>()
-                            .state
-                            .players['player_1']!
-                            .dice
+                        children: state.players['player_1']!.dice
                             .map((d) => Dice(value: d.value))
                             .toList(),
                       ),

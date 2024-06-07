@@ -22,8 +22,9 @@ class PlayerActions extends StatelessWidget {
                 .read<GameBloc>()
                 .compareBids(state.currentBid, state.userBid!) ==
             0;
-
-        final canBid = isCurrentUser && !bidsEqual;
+        final firstBid = state.currentBid.playerId == null;
+        final canBid =
+            (isCurrentUser && !bidsEqual) || (isCurrentUser && firstBid);
         final canLiar = state.currentBid.playerId != currentUser &&
             state.currentBid.playerId != null;
         final canSpotOn = isCurrentUser && bidsEqual;
@@ -40,14 +41,22 @@ class PlayerActions extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.all(8),
                       child: FilledButton(
-                        onPressed: canLiar ? () => {} : null,
+                        onPressed: canLiar
+                            ? () => context
+                                .read<GameBloc>()
+                                .add(const PlayerSubmitLiarGameEvent())
+                            : null,
                         child: const Text('LIAR'),
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8),
                       child: FilledButton(
-                        onPressed: canSpotOn ? () => {} : null,
+                        onPressed: canSpotOn
+                            ? () => context
+                                .read<GameBloc>()
+                                .add(const PlayerSubmitSpotOnGameEvent())
+                            : null,
                         child: const Text('SPOT ON'),
                       ),
                     ),
@@ -62,9 +71,9 @@ class PlayerActions extends StatelessWidget {
                       padding: const EdgeInsets.all(8),
                       child: FilledButton(
                         onPressed: canBid
-                            ? () => context.read<GameBloc>().add(
-                                  const PlayerSubmitBidGameEvent(),
-                                )
+                            ? () => context
+                                .read<GameBloc>()
+                                .add(const PlayerSubmitBidGameEvent())
                             : null,
                         child: const Text('BID'),
                       ),

@@ -7,21 +7,23 @@ part 'generated/game.g.dart';
 part 'generated/game.firestore_converter.dart';
 part 'generated/game.freezed.dart';
 
-enum GameStatus { initial, loading, playing, transitioning, success, failure }
+enum GameStatus { initial, loading, playing, transitioning, finished, failure }
 
 @freezed
 @FirestoreConverter(defaultPath: 'games')
 class Game with _$Game {
   factory Game({
-    required String hostId,
+    String? hostId,
     String? id,
     @Default([]) List<String> order,
     @Default([]) List<String> tableOrder,
+    @Default(0) int? totalDice, // Total Dice of all players
     @Default(0) int round,
     @Default(0) int turn,
     @Default(GameStatus.initial) GameStatus status,
     @DateTimeNullableConverter() DateTime? createdAt,
     @BidConverter() Bid? currentBid,
+    String? winner, // Total Dice of all players
     @PlayersConverter() @Default({}) Map<String, Player> players,
   }) = _Game;
 
