@@ -22,36 +22,52 @@ class PlayerActions extends StatelessWidget {
                 .read<GameBloc>()
                 .compareBids(state.currentBid, state.userBid!) ==
             0;
+
         final firstBid = state.currentBid.playerId == null;
         final canBid =
             (isCurrentUser && !bidsEqual) || (isCurrentUser && firstBid);
         final canLiar = state.currentBid.playerId != currentUser &&
             state.currentBid.playerId != null;
         final canSpotOn = isCurrentUser && bidsEqual;
+        //print('MAKING HERE');
 
-        return Center(
-          child: Flex(
-            direction: Axis.horizontal,
+        return Card(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                child: Flex(
+                  direction: Axis.vertical,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: FilledButton(
-                        onPressed: canLiar
-                            ? () => context
-                                .read<GameBloc>()
-                                .add(const PlayerSubmitLiarGameEvent())
-                            : null,
-                        child: const Text('LIAR'),
-                      ),
+                    FilledButton(
+                      onPressed: canLiar
+                          ? () => context
+                              .read<GameBloc>()
+                              .add(const PlayerSubmitLiarGameEvent())
+                          : null,
+                      child: const Text('   LIAR   '),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: FilledButton(
+                    const FilledButton(
+                      onPressed: null,
+                      child: Text('SPECIAL'),
+                    ),
+                  ],
+                ),
+              ),
+              const Flexible(
+                fit: FlexFit.tight,
+                child: BidButtons(),
+              ),
+              Expanded(
+                child: IntrinsicWidth(
+                  child: Flex(
+                    direction: Axis.vertical,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FilledButton(
                         onPressed: canSpotOn
                             ? () => context
                                 .read<GameBloc>()
@@ -59,33 +75,16 @@ class PlayerActions extends StatelessWidget {
                             : null,
                         child: const Text('SPOT ON'),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              const Expanded(child: BidButtons()),
-              Expanded(
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: FilledButton(
+                      FilledButton(
                         onPressed: canBid
                             ? () => context
                                 .read<GameBloc>()
                                 .add(const PlayerSubmitBidGameEvent())
                             : null,
-                        child: const Text('BID'),
+                        child: const Text('    BID    '),
                       ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.all(8),
-                      child: FilledButton(
-                        onPressed: null,
-                        child: Text('SPECIAL'),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -127,8 +126,9 @@ class BidButtons extends StatelessWidget {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Flexible(
+                  Expanded(
                     child: IconButton(
+                      padding: EdgeInsets.zero,
                       icon: const Icon(Icons.arrow_upward),
                       onPressed: canIncrementNumber
                           ? () => context.read<GameBloc>().add(
@@ -143,11 +143,12 @@ class BidButtons extends StatelessWidget {
                   Expanded(
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Dice(value: state.userBid!.number),
+                      child: Dice(value: state.userBid!.number, isDie: false),
                     ),
                   ),
-                  Flexible(
+                  Expanded(
                     child: IconButton(
+                      padding: EdgeInsets.zero,
                       icon: const Icon(Icons.arrow_downward),
                       onPressed: canDecrementNumber
                           ? () => context.read<GameBloc>().add(
@@ -167,6 +168,7 @@ class BidButtons extends StatelessWidget {
                 children: [
                   Flexible(
                     child: IconButton(
+                      padding: EdgeInsets.zero,
                       icon: const Icon(Icons.arrow_upward),
                       onPressed: canIncrementValue
                           ? () => context.read<GameBloc>().add(
@@ -186,6 +188,7 @@ class BidButtons extends StatelessWidget {
                   ),
                   Flexible(
                     child: IconButton(
+                      padding: EdgeInsets.zero,
                       icon: const Icon(Icons.arrow_downward),
                       onPressed: canDecrementValue
                           ? () => context.read<GameBloc>().add(
@@ -201,6 +204,134 @@ class BidButtons extends StatelessWidget {
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+}
+
+class BidButtonsAlternative extends StatelessWidget {
+  const BidButtonsAlternative({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<GameBloc, GameState>(
+      builder: (context, state) {
+        //Stub
+        const currentUser = 'player_1';
+        final isCurrentUser = (state.order.isNotEmpty
+                ? state.order[state.turn % state.order.length]
+                : '') ==
+            currentUser;
+
+        final canIncrementNumber =
+            isCurrentUser && state.userBid!.number < state.totalDice!;
+        final canDecrementNumber = isCurrentUser &&
+            state.userBid!.number - 1 >= state.currentBid.number;
+
+        final canIncrementValue =
+            isCurrentUser && context.read<GameBloc>().canIncrementBidValue();
+        final canDecrementValue =
+            isCurrentUser && context.read<GameBloc>().canDecrementBidValue();
+
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(''),
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Dice(value: state.userBid!.number),
+                  ),
+                ),
+                const Text('Number'),
+              ],
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Expanded(
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(Icons.arrow_upward),
+                    onPressed: canIncrementNumber
+                        ? () => context.read<GameBloc>().add(
+                              const PlayerUpdateUserBidGameEvent(
+                                bidPart: BidPart.number,
+                                bidType: BidUpdateType.increment,
+                              ),
+                            )
+                        : null,
+                  ),
+                ),
+                Expanded(
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(Icons.arrow_downward),
+                    onPressed: canDecrementNumber
+                        ? () => context.read<GameBloc>().add(
+                              const PlayerUpdateUserBidGameEvent(
+                                bidPart: BidPart.number,
+                                bidType: BidUpdateType.decrement,
+                              ),
+                            )
+                        : null,
+                  ),
+                ),
+              ],
+            ),
+            //const Text(' x '),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(''),
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Dice(value: state.userBid!.value),
+                  ),
+                ),
+                const Text('Value'),
+              ],
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Expanded(
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(Icons.arrow_upward),
+                    onPressed: canIncrementValue
+                        ? () => context.read<GameBloc>().add(
+                              const PlayerUpdateUserBidGameEvent(
+                                bidPart: BidPart.value,
+                                bidType: BidUpdateType.increment,
+                              ),
+                            )
+                        : null,
+                  ),
+                ),
+                Expanded(
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(Icons.arrow_downward),
+                    onPressed: canDecrementValue
+                        ? () => context.read<GameBloc>().add(
+                              const PlayerUpdateUserBidGameEvent(
+                                bidPart: BidPart.value,
+                                bidType: BidUpdateType.decrement,
+                              ),
+                            )
+                        : null,
+                  ),
+                ),
+              ],
+            ),
+          ],
         );
       },
     );

@@ -8,81 +8,126 @@ class GamePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const GameView();
+    return const GameViewMobile();
   }
 }
 
-class GameView extends StatelessWidget {
-  const GameView({super.key});
+class GameViewMobile extends StatelessWidget {
+  const GameViewMobile({super.key});
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<GameBloc, GameState>(
-      builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(),
-          body: SafeArea(
-            child: SizedBox.expand(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    flex: 9,
-                    child: SizedBox.expand(
-                      child: Center(
-                        child: PlayersLayout(
-                          players:
-                              context.read<GameBloc>().playerOrder.isNotEmpty
-                                  ? context.read<GameBloc>().playerOrder
-                                  : [],
-                        ),
+    final temp = context.read<GameBloc>().playerOrder;
+    //..add(context.read<GameBloc>().playerOrder[0])
+    // ..add(context.read<GameBloc>().playerOrder[0])
+    //..add(context.read<GameBloc>().playerOrder[0])
+    // ..add(context.read<GameBloc>().playerOrder[0]);
+    return Scaffold(
+      body: ColoredBox(
+        color: Colors.grey.shade200,
+        child: SafeArea(
+          bottom: false,
+          child: SizedBox.expand(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  flex: 8,
+                  child: SizedBox.expand(
+                    child: Center(
+                      child: PlayersLayout(
+                        players: context.read<GameBloc>().playerOrder.isNotEmpty
+                            ? temp
+                            : [],
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 100),
-                    child: Divider(),
-                  ),
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: state.players['player_1']!.dice
-                              .map((d) => Dice(value: d.value))
-                              .toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Expanded(flex: 2, child: PlayerActions()),
-                ],
-              ),
+                ),
+                const Expanded(flex: 2, child: PlayerDice()),
+                //const Divider(height: 8, endIndent: 50, indent: 50),
+                const Expanded(flex: 2, child: PlayerActions()),
+              ],
             ),
           ),
-          floatingActionButton: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              FloatingActionButton(
-                onPressed: () {
-                  context.read<GameBloc>().add(
-                        const PlayerUpdateUserBidGameEvent(
-                          bidPart: BidPart.number,
-                          bidType: BidUpdateType.increment,
-                        ),
-                      );
-                  context.read<GameBloc>().add(
-                        const PlayerSubmitBidGameEvent(),
-                      );
-                },
-                child: const Icon(Icons.skip_next),
-              ),
-            ],
+        ),
+      ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(8),
+        child: FloatingActionButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-        );
-      },
+          mini: true,
+          onPressed: () {
+            context.read<GameBloc>().add(
+                  const PlayerUpdateUserBidGameEvent(
+                    bidPart: BidPart.number,
+                    bidType: BidUpdateType.increment,
+                  ),
+                );
+            context.read<GameBloc>().add(
+                  const PlayerSubmitBidGameEvent(),
+                );
+          },
+          child: const Icon(Icons.settings),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+    );
+  }
+}
+
+class GameViewHorizontal extends StatelessWidget {
+  const GameViewHorizontal({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: ColoredBox(
+        color: Colors.grey.shade400,
+        child: SafeArea(
+          bottom: false,
+          child: SizedBox.expand(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  flex: 7,
+                  child: SizedBox.expand(
+                    child: Center(
+                      child: PlayersLayout(
+                        players: context.read<GameBloc>().playerOrder.isNotEmpty
+                            ? context.read<GameBloc>().playerOrder
+                            : [],
+                      ),
+                    ),
+                  ),
+                ),
+                const Divider(height: 8, endIndent: 50, indent: 50),
+                const Expanded(flex: 3, child: PlayerActions()),
+              ],
+            ),
+          ),
+        ),
+      ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(8),
+        child: FloatingActionButton(
+          onPressed: () {
+            context.read<GameBloc>().add(
+                  const PlayerUpdateUserBidGameEvent(
+                    bidPart: BidPart.number,
+                    bidType: BidUpdateType.increment,
+                  ),
+                );
+            context.read<GameBloc>().add(
+                  const PlayerSubmitBidGameEvent(),
+                );
+          },
+          child: const Icon(Icons.skip_next),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 }

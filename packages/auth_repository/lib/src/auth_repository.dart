@@ -25,12 +25,12 @@ class AuthRepository {
       final credential = await FBAuth.FirebaseAuth.instance
           .signInWithEmailAndPassword(email: emailAddress, password: password);
       if (credential.user != null) {
-        print(credential.user!.uid);
+        //print(credential.user!.uid);
         final user = getUserById(
           id: credential.user!.uid,
           email: credential.user!.email ?? "",
         );
-        print(user);
+        //print(user);
         return user;
       }
     } on FBAuth.FirebaseAuthException catch (e) {

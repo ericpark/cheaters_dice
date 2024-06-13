@@ -31,7 +31,7 @@ class LoginPage extends StatelessWidget {
         builder: (context, state) {
           return FlutterLogin(
             title: 'Login',
-            logo: const AssetImage('assets/logo.png'),
+            logo: const AssetImage('assets/icons/logo_transparent.png'),
             theme: LoginTheme(
               primaryColor: const Color(0xf0C3EFF2),
               buttonTheme: LoginButtonTheme(

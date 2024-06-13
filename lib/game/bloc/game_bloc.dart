@@ -54,7 +54,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   FutureOr<void> _onGameStateUpdate(
     GameStateUpdate event,
     Emitter<GameState> emit,
-  ) {
+  ) async {
     if (event.game == null) return null;
 
     final updatedGame = GameState.fromJson(event.game?.toJson() ?? {});
@@ -65,12 +65,19 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       0,
       (previousValue, player) => previousValue + player.dice.length,
     );
+
+    //emit(state.copyWith(status: GameStatus.transitioning));
+
     emit(
       updatedGame.copyWith(
+        status: GameStatus.transitioning,
         totalDice: totalDice,
         userBid: updatedGame.currentBid,
       ),
     );
+    await Future<void>.delayed(const Duration(seconds: 5));
+    //print("done waiting");
+    emit(state.copyWith(status: GameStatus.playing));
   }
 
   FutureOr<void> _onRoundStart(event, Emitter<GameState> emit) {

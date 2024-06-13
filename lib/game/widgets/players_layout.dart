@@ -1,7 +1,9 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:cheaters_dice/game/game.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class PlayersLayout extends StatelessWidget {
+class PlayersLayout extends StatefulWidget {
   const PlayersLayout({required this.players, super.key});
 
   /// A list of other players in the game in order of play.
@@ -9,91 +11,179 @@ class PlayersLayout extends StatelessWidget {
   final List<Player> players;
 
   @override
-  Widget build(BuildContext context) {
-    final numberOfPlayers = players.length;
-    Widget centerLeftSlot = Container();
-    Widget centerTopSlot = Container();
-    Widget centerRightSlot = Container();
-    Widget leftSlot = Container();
-    Widget rightSlot = Container();
+  State<PlayersLayout> createState() => _PlayersLayoutState();
+}
 
-    var shouldShowTopLeftAndRight = false;
-    var shouldShowTopCenter = false;
-    var shouldShowMiddleLeftAndRight = false;
+class _PlayersLayoutState extends State<PlayersLayout> {
+  bool showAnimation = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final numberOfPlayers = widget.players.length;
+    const infoWidget = GameInfo();
+    var showBottomRow = true;
+    var topChildren = <Widget>[
+      Flexible(child: Container()),
+      const Expanded(child: SizedBox(width: 1)),
+      const Expanded(child: SizedBox(width: 1)),
+      const Expanded(child: SizedBox(width: 1)),
+      Flexible(child: Container()),
+    ];
+    var middleChildren = <Widget>[
+      const Expanded(child: SizedBox(width: 1)),
+      const Expanded(child: infoWidget),
+      const Expanded(child: SizedBox(width: 1)),
+    ];
+    var bottomChildren = <Widget>[
+      const Expanded(child: SizedBox(width: 1)),
+      const Expanded(child: infoWidget),
+      const Expanded(child: SizedBox(width: 1)),
+    ];
 
     switch (numberOfPlayers) {
       case 0:
         break; // Shouldn't play with 1 player
       case 1:
-        centerTopSlot = PlayerAvatar(player: players[0]);
+        topChildren = [
+          Flexible(child: Container()),
+          Expanded(child: PlayerAvatar(player: widget.players[0])),
+          Flexible(child: Container()),
+        ];
+        showBottomRow = false;
+        bottomChildren = [];
 
-        shouldShowTopCenter = true;
       case 2:
-        centerLeftSlot = PlayerAvatar(player: players[0]);
-        centerLeftSlot = PlayerAvatar(player: players[1]);
-
-        shouldShowTopLeftAndRight = true;
+        topChildren = [
+          Expanded(child: PlayerAvatar(player: widget.players[0])),
+          Expanded(child: PlayerAvatar(player: widget.players[1])),
+        ];
+        showBottomRow = false;
+        bottomChildren = [];
       case 3:
-        leftSlot = PlayerAvatar(player: players[0]);
-        centerTopSlot = PlayerAvatar(player: players[1]);
-        rightSlot = PlayerAvatar(player: players[2]);
-
-        shouldShowTopCenter = true;
-        shouldShowMiddleLeftAndRight = true;
+        topChildren = [
+          Flexible(child: Container()),
+          Expanded(child: PlayerAvatar(player: widget.players[1])),
+          Flexible(child: Container()),
+        ];
+        bottomChildren = [
+          Expanded(child: PlayerAvatar(player: widget.players[0])),
+          Flexible(child: Container()),
+          Expanded(child: PlayerAvatar(player: widget.players[2])),
+        ];
       case 4:
-        leftSlot = PlayerAvatar(player: players[0]);
-        centerLeftSlot = PlayerAvatar(player: players[1]);
-        centerRightSlot = PlayerAvatar(player: players[2]);
-        rightSlot = PlayerAvatar(player: players[3]);
-
-        shouldShowTopLeftAndRight = true;
-        shouldShowMiddleLeftAndRight = true;
-
+        topChildren = [
+          Flexible(child: Container()),
+          Expanded(flex: 2, child: PlayerAvatar(player: widget.players[1])),
+          Expanded(flex: 2, child: PlayerAvatar(player: widget.players[2])),
+          Flexible(child: Container()),
+        ];
+        middleChildren = [
+          Expanded(child: PlayerAvatar(player: widget.players[0])),
+          const Expanded(child: infoWidget),
+          Expanded(child: PlayerAvatar(player: widget.players[3])),
+        ];
+        showBottomRow = false;
+        bottomChildren = [];
       case 5:
-        leftSlot = PlayerAvatar(player: players[0]);
-        centerLeftSlot = PlayerAvatar(player: players[1]);
-        centerTopSlot = PlayerAvatar(player: players[2]);
-        centerRightSlot = PlayerAvatar(player: players[3]);
-        rightSlot = PlayerAvatar(player: players[4]);
-
-        shouldShowTopLeftAndRight = true;
-        shouldShowTopCenter = true;
-        shouldShowMiddleLeftAndRight = true;
+        topChildren = [
+          Flexible(child: Container()),
+          Expanded(child: PlayerAvatar(player: widget.players[2])),
+          Flexible(child: Container()),
+        ];
+        middleChildren = [
+          Expanded(child: PlayerAvatar(player: widget.players[1])),
+          const Expanded(child: infoWidget),
+          Expanded(child: PlayerAvatar(player: widget.players[3])),
+        ];
+        bottomChildren = [
+          Expanded(child: PlayerAvatar(player: widget.players[0])),
+          Flexible(child: Container()),
+          Expanded(child: PlayerAvatar(player: widget.players[4])),
+        ];
     }
 
-    return Flex(
-      direction: Axis.vertical,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Expanded(
-          child: Center(
-            child: Flex(
-              direction: Axis.horizontal,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Flexible(child: Container()),
-                if (shouldShowTopLeftAndRight) Expanded(child: centerLeftSlot),
-                if (shouldShowTopCenter) Expanded(child: centerTopSlot),
-                if (shouldShowTopLeftAndRight) Expanded(child: centerRightSlot),
-                Flexible(child: Container()),
-              ],
-            ),
-          ),
-        ),
-        Expanded(
-          child: Flex(
-            direction: Axis.horizontal,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
+    return BlocConsumer<GameBloc, GameState>(
+      listener: (context, state) {
+        if (state.status == GameStatus.transitioning) {
+          //print('transitioning');
+          setState(() {
+            showAnimation = true;
+          });
+          //print('transitioning completed');
+        }
+      },
+      builder: (context, state) {
+        return SafeArea(
+          child: Stack(
             children: [
-              if (shouldShowMiddleLeftAndRight) Expanded(child: leftSlot),
-              const Expanded(child: CurrentBid()),
-              if (shouldShowMiddleLeftAndRight) Expanded(child: rightSlot),
+              Flex(
+                direction: Axis.vertical,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    child: Center(
+                      child: Flex(
+                        direction: Axis.horizontal,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: topChildren,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: Flex(
+                        direction: Axis.horizontal,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: middleChildren,
+                      ),
+                    ),
+                  ),
+                  if (showBottomRow)
+                    Expanded(
+                      child: Flex(
+                        mainAxisSize: MainAxisSize.min,
+                        direction: Axis.horizontal,
+                        //crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: bottomChildren,
+                      ),
+                    ),
+                ],
+              ),
+              Center(
+                child: showAnimation
+                    ? AnimatedTextKit(
+                        totalRepeatCount: 1,
+                        onFinished: () {
+                          setState(() {
+                            showAnimation = false;
+                          });
+                        },
+                        animatedTexts: [
+                          FadeAnimatedText(
+                            'BID',
+                            textStyle: const TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            duration: const Duration(milliseconds: 3000),
+                          ),
+                          ScaleAnimatedText(
+                            'CALLED YOU A LIAR',
+                            textStyle: const TextStyle(
+                              fontSize: 70,
+                              fontFamily: 'Canterbury',
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(),
+              ),
             ],
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }

@@ -14,6 +14,8 @@ extension LobbyStatusX on LobbyStatus {
 abstract class LobbyState with _$LobbyState {
   factory LobbyState({
     @Default(LobbyStatus.initial) LobbyStatus status,
+    @Default([]) List<Lobby> availableLobbies,
+    @Default('') String joinedLobbyId,
   }) = _LobbyState;
 
   factory LobbyState.initial() => _LobbyState();

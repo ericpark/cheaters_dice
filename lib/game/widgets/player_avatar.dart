@@ -8,56 +8,53 @@ class PlayerAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return Padding(
-            padding: const EdgeInsets.all(8),
-            child: Flex(
-              mainAxisAlignment: MainAxisAlignment.center,
-              direction: Axis.vertical,
-              children: [
-                Expanded(
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Padding(
+          padding: const EdgeInsets.all(8),
+          child: Flex(
+            mainAxisAlignment: MainAxisAlignment.center,
+            direction: Axis.vertical,
+            children: [
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: CircleAvatar(
+                  radius: constraints.maxHeight * 0.90,
+                  backgroundColor: Colors.blue,
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: CircleAvatar(
-                      radius: constraints.maxHeight * 0.80,
-                      backgroundColor: Colors.blue,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          player.name.toString(),
-                          style: const TextStyle(
-                            fontSize: 48,
-                            color: Colors.white,
-                          ),
-                        ),
+                    child: Text(
+                      player.name.toString(),
+                      style: const TextStyle(
+                        fontSize: 48,
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ),
-                //SizedBox(height: constraints.maxHeight * 0.05),
-                Flexible(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      player.dice.length,
-                      (index) => Container(
-                        width: constraints.maxHeight * 0.1,
-                        height: constraints.maxHeight * 0.1,
-                        decoration: BoxDecoration(
-                          border: Border.all(),
-                        ),
-                        margin: const EdgeInsets.all(4),
+              ),
+
+              //SizedBox(height: constraints.maxHeight * 0.05),
+              Flexible(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    player.dice.length,
+                    (index) => Container(
+                      width: constraints.maxHeight * 0.1,
+                      height: constraints.maxHeight * 0.1,
+                      decoration: BoxDecoration(
+                        border: Border.all(),
                       ),
+                      margin: const EdgeInsets.all(4),
                     ),
                   ),
                 ),
-              ],
-            ),
-          );
-        },
-      ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
