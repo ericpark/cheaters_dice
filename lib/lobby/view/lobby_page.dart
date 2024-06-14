@@ -39,7 +39,13 @@ class LobbyView extends StatelessWidget {
                           subtitle: Text('Players: ${lobby.players}'),
                           trailing: ElevatedButton(
                             onPressed: () {
-                              context.go('/lobby/${lobby.id}');
+                              context.read<LobbyCubit>().joinLobby(lobby.id);
+                              if (state.status == LobbyStatus.playing) {
+                                const gameId = '46hOQ2pQ26C4aIx6iAWF';
+                                context.go('/game/$gameId');
+                              } else {
+                                context.go('/lobby/${lobby.id}');
+                              }
                             },
                             child: const Text('Join'),
                           ),

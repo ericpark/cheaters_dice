@@ -37,9 +37,7 @@ class App extends StatelessWidget {
           ),
           BlocProvider<GameBloc>(
             create: (BuildContext context) =>
-                GameBloc(gameRepository: context.read<GameRepository>())
-                  ..init(),
-            lazy: false,
+                GameBloc(gameRepository: context.read<GameRepository>()),
           ),
           BlocProvider(
             create: (context) => LobbyCubit()..init(),

@@ -50,6 +50,7 @@ def update_game_from_action(event: firestore_fn.Event[firestore_fn.DocumentSnaps
     if is_finished: 
         update_data["winner"] = update_data["order"][0]
 
+    update_data["last_action"] = {"id": last_action_data["id"], "type": last_action_data["action_type"]}
     #Update the game in the database. This will push all the new state to the players.
     _update_game(firestore_client, game_id, update_data)
     _update_action(firestore_client, last_action_data, {"processed": True})
@@ -100,7 +101,7 @@ def _handle_challenge_action(action_data: dict, game_data: dict, firestore_clien
     _save_game_as_round(firestore_client=firestore_client, game_id=action_data["game_id"], game_data=game_data, round_results=round_results)
 
     #reset the game state
-    return { "players": players, "round": action_data["round"] + 1, "turn":0, "current_bid": {"player_id": None, "number": 1, "value": 2}, "order": game_data["order"], "total_dice": game_data["total_dice"]}
+    return { "players": players, "round": action_data["round"] + 1, "turn":0, "current_bid": {"player_id": None, "number": 1, "value": 1}, "order": game_data["order"], "total_dice": game_data["total_dice"]}
 # [END _actual_dice_count]
 
 
@@ -137,7 +138,7 @@ def _handle_spot_on_action(action_data: dict, game_data: dict, firestore_client:
     _save_game_as_round(firestore_client=firestore_client, game_id=action_data["game_id"], game_data=game_data, round_results=round_results)
 
     #reset the game state
-    return { "players": players, "round": action_data["round"] + 1, "turn":0, "current_bid": {"player_id": None, "number": 1, "value": 2}, "order": game_data["order"], "total_dice": game_data["total_dice"]}
+    return { "players": players, "round": action_data["round"] + 1, "turn":0, "current_bid": {"player_id": None, "number": 1, "value": 1}, "order": game_data["order"], "total_dice": game_data["total_dice"]}
 # [END _handle_spot_on_action]
 
 

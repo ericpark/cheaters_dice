@@ -1,3 +1,4 @@
+import 'package:cheaters_dice/auth/cubit/auth_cubit.dart';
 import 'package:cheaters_dice/game/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,8 +12,7 @@ class PlayerActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<GameBloc, GameState>(
       builder: (context, state) {
-        //Stub
-        const currentUser = 'player_1';
+        final currentUser = context.read<AuthCubit>().state.user?.id;
         final isCurrentUser = (state.order.isNotEmpty
                 ? state.order[state.turn % state.order.length]
                 : '') ==
@@ -25,69 +25,81 @@ class PlayerActions extends StatelessWidget {
 
         final firstBid = state.currentBid.playerId == null;
         final canBid =
-            (isCurrentUser && !bidsEqual) || (isCurrentUser && firstBid);
+            ((isCurrentUser && !bidsEqual) || (isCurrentUser && firstBid)) &&
+                state.status == GameStatus.playing;
         final canLiar = state.currentBid.playerId != currentUser &&
-            state.currentBid.playerId != null;
-        final canSpotOn = isCurrentUser && bidsEqual;
+            state.currentBid.playerId != null &&
+            state.status == GameStatus.playing;
+        final canSpotOn =
+            isCurrentUser && bidsEqual && state.status == GameStatus.playing;
         //print('MAKING HERE');
 
-        return Card(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                child: Flex(
-                  direction: Axis.vertical,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FilledButton(
-                      onPressed: canLiar
-                          ? () => context
-                              .read<GameBloc>()
-                              .add(const PlayerSubmitLiarGameEvent())
-                          : null,
-                      child: const Text('   LIAR   '),
+        return ColoredBox(
+          color: Colors.white,
+          //margin: const EdgeInsets.all(8),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        FilledButton(
+                          onPressed: canLiar
+                              ? () => context
+                                  .read<GameBloc>()
+                                  .add(const PlayerSubmitLiarGameEvent())
+                              : null,
+                          child: const Text('LIAR'),
+                        ),
+                        const FilledButton(
+                          onPressed: null,
+                          child: Text('SPECIAL'),
+                        ),
+                      ],
                     ),
-                    const FilledButton(
-                      onPressed: null,
-                      child: Text('SPECIAL'),
-                    ),
-                  ],
-                ),
-              ),
-              const Flexible(
-                fit: FlexFit.tight,
-                child: BidButtons(),
-              ),
-              Expanded(
-                child: IntrinsicWidth(
-                  child: Flex(
-                    direction: Axis.vertical,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      FilledButton(
-                        onPressed: canSpotOn
-                            ? () => context
-                                .read<GameBloc>()
-                                .add(const PlayerSubmitSpotOnGameEvent())
-                            : null,
-                        child: const Text('SPOT ON'),
-                      ),
-                      FilledButton(
-                        onPressed: canBid
-                            ? () => context
-                                .read<GameBloc>()
-                                .add(const PlayerSubmitBidGameEvent())
-                            : null,
-                        child: const Text('    BID    '),
-                      ),
-                    ],
                   ),
                 ),
-              ),
-            ],
+                const Flexible(
+                  fit: FlexFit.tight,
+                  child: BidButtons(),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        FilledButton(
+                          onPressed: canSpotOn
+                              ? () => context
+                                  .read<GameBloc>()
+                                  .add(const PlayerSubmitSpotOnGameEvent())
+                              : null,
+                          child: const Text('SPOT ON'),
+                        ),
+                        FilledButton(
+                          onPressed: canBid
+                              ? () => context
+                                  .read<GameBloc>()
+                                  .add(const PlayerSubmitBidGameEvent())
+                              : null,
+                          child: const Text('BID'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -102,8 +114,7 @@ class BidButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<GameBloc, GameState>(
       builder: (context, state) {
-        //Stub
-        const currentUser = 'player_1';
+        final currentUser = context.read<AuthCubit>().state.user?.id;
         final isCurrentUser = (state.order.isNotEmpty
                 ? state.order[state.turn % state.order.length]
                 : '') ==
@@ -217,8 +228,7 @@ class BidButtonsAlternative extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<GameBloc, GameState>(
       builder: (context, state) {
-        //Stub
-        const currentUser = 'player_1';
+        final currentUser = context.read<AuthCubit>().state.user?.id;
         final isCurrentUser = (state.order.isNotEmpty
                 ? state.order[state.turn % state.order.length]
                 : '') ==

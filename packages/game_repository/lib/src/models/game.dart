@@ -14,6 +14,7 @@ enum GameStatus { initial, loading, playing, transitioning, finished, failure }
 class Game with _$Game {
   factory Game({
     String? hostId,
+    String? lobbyId,
     String? id,
     @Default([]) List<String> order,
     @Default([]) List<String> tableOrder,
@@ -25,6 +26,7 @@ class Game with _$Game {
     @BidConverter() Bid? currentBid,
     String? winner, // Total Dice of all players
     @PlayersConverter() @Default({}) Map<String, Player> players,
+    Map<String, dynamic>? lastAction,
   }) = _Game;
 
   factory Game.fromJson(Map<String, dynamic> json) => _$GameFromJson(json);

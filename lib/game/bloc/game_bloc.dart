@@ -28,23 +28,30 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<PlayerSubmitBidGameEvent>(_onPlayerSubmitBid);
     on<PlayerSubmitLiarGameEvent>(_onPlayerLiar);
     on<PlayerSubmitSpotOnGameEvent>(_onPlayerSpotOn);
+    on<TurnCompleted>(_onTurnComplete);
+    on<GameCompleted>(_onGameComplete);
   }
 
   final GameRepository _gameRepository;
 
   StreamSubscription<DocumentSnapshot<Game>>? _gameStream;
-  static const userId = 'player_1';
 
-  void init() {
-    add(GameStart());
+  void init(String userId, String gameId) {
+    add(GameStart(userId: userId, gameId: gameId));
     add(RoundStart());
   }
 
-  FutureOr<void> _onGameStart(event, Emitter<GameState> emit) async {
+  FutureOr<void> _onGameStart(GameStart event, Emitter<GameState> emit) async {
     await _gameStream?.cancel();
-
+    emit(
+      GameState.initial().copyWith(
+        status: GameStatus.initial,
+        currentUserId: event.userId,
+      ),
+    );
+    print("game started---------");
     _gameStream = await _gameRepository.getGameStream(
-      gameId: '46hOQ2pQ26C4aIx6iAWF',
+      gameId: event.gameId,
       onData: (Game? game) {
         add(GameStateUpdate(game: game));
       },
@@ -67,17 +74,41 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
 
     //emit(state.copyWith(status: GameStatus.transitioning));
+    final userBid = updatedGame.currentBid == const Bid(number: 1, value: 1)
+        ? const Bid(number: 1, value: 2)
+        : updatedGame.currentBid;
+    print('previous: ${state.round}');
+    print('next: ${updatedGame.round}');
+    if (state.round == updatedGame.round) {
+      emit(
+        updatedGame.copyWith(
+          status: GameStatus.transitioning,
+          totalDice: totalDice,
+          userBid: userBid,
+          currentUserId: state.currentUserId,
+        ),
+      );
+    } else {
+      print("NEW ROUND");
 
-    emit(
-      updatedGame.copyWith(
-        status: GameStatus.transitioning,
-        totalDice: totalDice,
-        userBid: updatedGame.currentBid,
-      ),
-    );
+      emit(
+        updatedGame.copyWith(
+          status: GameStatus.transitioning,
+          totalDice: totalDice,
+          userBid: userBid,
+          currentUserId: state.currentUserId,
+        ),
+      );
+    }
+
     await Future<void>.delayed(const Duration(seconds: 5));
     //print("done waiting");
-    emit(state.copyWith(status: GameStatus.playing));
+    //print(state);
+    //emit(state.copyWith(status: GameStatus.transitioning));
+
+    if (updatedGame.status == GameStatus.finished) {
+      emit(state.copyWith(status: GameStatus.finished));
+    }
   }
 
   FutureOr<void> _onRoundStart(event, Emitter<GameState> emit) {
@@ -85,7 +116,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       state.copyWith(
         status: GameStatus.playing,
         //totalDice: 10,
-        userBid: Bid.minimum(),
+        //userBid: Bid.minimum(),
         // order: order,
       ),
     );
@@ -148,7 +179,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       playerId: state.order[state.turn % state.order.length],
       round: state.round,
       turn: state.turn,
-      gameId: '46hOQ2pQ26C4aIx6iAWF',
+      gameId: state.id!,
     );
 
     final success =
@@ -172,7 +203,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       playerId: state.order[state.turn % state.order.length],
       round: state.round,
       turn: state.turn,
-      gameId: '46hOQ2pQ26C4aIx6iAWF',
+      gameId: state.id!,
     );
 
     final success =
@@ -181,9 +212,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     //Do not emit if there's an error.
     if (!success) return;
 
-    emit(
+    /*emit(
       state.copyWith(turn: 0, round: state.round + 1, userBid: Bid.minimum()),
-    );
+    );*/
   }
 
   FutureOr<void> _onPlayerSpotOn(event, Emitter<GameState> emit) async {
@@ -192,7 +223,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       playerId: state.order[state.turn % state.order.length],
       round: state.round,
       turn: state.turn,
-      gameId: '46hOQ2pQ26C4aIx6iAWF',
+      gameId: state.id!,
     );
 
     final success =
@@ -201,9 +232,17 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     //Do not emit if there's an error.
     if (!success) return;
 
-    emit(
+    /*emit(
       state.copyWith(turn: 0, round: state.round + 1, userBid: Bid.minimum()),
-    );
+    );*/
+  }
+
+  FutureOr<void> _onTurnComplete(event, Emitter<GameState> emit) async {
+    emit(state.copyWith(status: GameStatus.playing, lastAction: null));
+  }
+
+  FutureOr<void> _onGameComplete(event, Emitter<GameState> emit) async {
+    emit(GameState.initial());
   }
 
   bool canIncrementBidValue() {
@@ -265,7 +304,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   List<Player> get playerOrder {
     if (state.order.isEmpty) return [];
-    final index = state.tableOrder.indexOf(userId);
+    if (state.currentUserId == null) return [];
+
+    final index = state.tableOrder.indexOf(state.currentUserId!);
 
     final order = state.tableOrder.sublist(index + 1)
       ..addAll(state.tableOrder.sublist(0, index));

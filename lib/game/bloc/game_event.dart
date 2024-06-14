@@ -9,7 +9,12 @@ sealed class GameEvent {
   const GameEvent();
 }
 
-class GameStart extends GameEvent {}
+class GameStart extends GameEvent {
+  const GameStart({required this.userId, required this.gameId});
+
+  final String userId;
+  final String gameId;
+}
 
 class GameStateUpdate extends GameEvent {
   const GameStateUpdate({required this.game});

@@ -54,7 +54,6 @@ class AuthRepository {
         User data = docSnapshot.data();
 
         users.add(data);
-        print(data);
       }
       return users;
     });
@@ -82,7 +81,6 @@ class AuthRepository {
           .createUserWithEmailAndPassword(
               email: emailAddress, password: password);
       if (credential.user != null) {
-        print(credential.user);
         final newUser = User(
           id: credential.user!.uid,
           email: credential.user!.email,

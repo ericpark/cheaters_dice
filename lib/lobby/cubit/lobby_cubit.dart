@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:cheaters_dice/lobby/lobby.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'generated/lobby_cubit.freezed.dart';
@@ -30,5 +31,26 @@ class LobbyCubit extends Cubit<LobbyState> {
 
   void joinLobby(String lobbyId) {
     emit(state.copyWith(joinedLobbyId: lobbyId));
+  }
+
+  Future<String> createGame(
+    String lobbyId,
+    String hostId,
+    List<String> players,
+  ) async {
+    final callable = FirebaseFunctions.instance.httpsCallable(
+      'create_game',
+      options: HttpsCallableOptions(
+        timeout: const Duration(seconds: 5),
+      ),
+    );
+    final result = await callable.call<Map<String, dynamic>>({
+      'lobby_id': lobbyId,
+      'players': players,
+      'host_id': hostId,
+      'starting_dice': 3,
+    });
+    final gameId = result.data;
+    return gameId['game_id'] as String;
   }
 }

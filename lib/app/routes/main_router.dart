@@ -44,9 +44,11 @@ GoRouter mainRouter(AuthState authState) => GoRouter(
           path: '/game/:gameId',
           //builder: (context, state) => const GamePage(),
           pageBuilder: (context, GoRouterState state) {
+            final gameId = state.pathParameters['gameId'];
+
             return CustomTransitionPage<void>(
               key: state.pageKey,
-              child: const GamePage(),
+              child: GamePage(gameId: gameId!),
               transitionDuration: const Duration(milliseconds: 1000),
               transitionsBuilder: (
                 context,

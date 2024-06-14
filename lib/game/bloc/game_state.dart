@@ -1,6 +1,13 @@
 part of 'game_bloc.dart';
 
-enum GameStatus { initial, loading, playing, transitioning, finished, failure }
+enum GameStatus {
+  initial,
+  loading,
+  playing,
+  transitioning,
+  finished,
+  failure,
+}
 
 extension GameStatusX on GameStatus {
   bool get isInitial => this == GameStatus.initial;
@@ -15,6 +22,7 @@ extension GameStatusX on GameStatus {
 abstract class GameState with _$GameState {
   factory GameState({
     @Default('') String? hostId, // Game Id
+    @Default('') String? lobbyId,
     @Default('') String? id, // Game Id
     @Default(GameStatus.initial) GameStatus status,
     @Default(Bid()) Bid currentBid, // Last Accepted bid
@@ -27,6 +35,9 @@ abstract class GameState with _$GameState {
     //@Default({}) Map<String, List<Die>> dice, // Dice of each player
     String? winner, // Total Dice of all players
     @PlayersConverter() @Default({}) Map<String, Player> players,
+    @Default('') String? currentUserId, // Current User Id
+    Map<String, dynamic>? lastAction,
+    // Last Action Id
   }) = _GameState;
 
   factory GameState.initial() => _GameState();

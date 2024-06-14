@@ -38,7 +38,7 @@ class Dice extends StatelessWidget {
 
     switch (value) {
       case 1:
-        icon = DiceIcons.dice0;
+        icon = DiceIcons.dice1;
       case 2:
         icon = DiceIcons.dice2;
       case 3:
