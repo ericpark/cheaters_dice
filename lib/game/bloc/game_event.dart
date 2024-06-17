@@ -23,9 +23,21 @@ class GameStateUpdate extends GameEvent {
   final Game? game;
 }
 
-class RoundStart extends GameEvent {}
+/// Round Start:
+///
+/// Responsible for Calculating players, total_dice,
+class RoundStart extends GameEvent {
+  const RoundStart({required this.game});
+  final GameState game;
+}
 
-class TurnStart extends GameEvent {}
+/// Turn Start:
+///
+/// Responsible for calculating the new user bid
+class ProcessTurnStart extends GameEvent {
+  const ProcessTurnStart({required this.game});
+  final GameState game;
+}
 
 class PlayerActionGameEvent extends GameEvent {}
 
@@ -50,6 +62,8 @@ class PlayerSubmitLiarGameEvent extends GameEvent {
 class PlayerSubmitSpotOnGameEvent extends GameEvent {
   const PlayerSubmitSpotOnGameEvent();
 }
+
+class AnimationCompleted extends GameEvent {}
 
 class TurnCompleted extends GameEvent {}
 

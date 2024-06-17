@@ -16,6 +16,7 @@ abstract class LobbyState with _$LobbyState {
     @Default(LobbyStatus.initial) LobbyStatus status,
     @Default([]) List<Lobby> availableLobbies,
     @Default('') String joinedLobbyId,
+    Lobby? joinedLobby,
   }) = _LobbyState;
 
   factory LobbyState.initial() => _LobbyState();

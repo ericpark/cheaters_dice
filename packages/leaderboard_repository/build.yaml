@@ -1,0 +1,30 @@
+targets:
+  $default:
+    sources:
+      include:
+        - lib/**
+      exclude:
+        - lib/**/generated/**
+    builders:
+      source_gen:combining_builder:
+        options:
+          ignore_for_file:
+            - implicit_dynamic_parameter
+          build_extensions: {'lib/src/models/{{}}.dart': ['lib/src/models/generated/{{}}.g.dart']}
+  
+      firestore_converter_generator:
+        enabled: true
+        options: 
+          build_extensions: {'lib/src/models/{{}}.dart': ['lib/src/models/generated/{{}}.firestore_converter.dart']}
+      json_serializable:
+        options:
+          field_rename: snake
+          checked: true
+      freezed:freezed:
+        enabled: true
+        options: 
+          build_extensions: {'lib/src/models/{{}}.dart': ['lib/src/models/generated/{{}}.freezed.dart']}
+global_options:
+  freezed:freezed:
+    runs_before:
+      - build_resolvers:transitive_digests

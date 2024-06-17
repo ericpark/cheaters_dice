@@ -1,8 +1,6 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:cheaters_dice/game/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 class PlayersLayout extends StatefulWidget {
   const PlayersLayout({
@@ -21,10 +19,6 @@ class PlayersLayout extends StatefulWidget {
 }
 
 class _PlayersLayoutState extends State<PlayersLayout> {
-  //bool showAnimation = false;
-  //bool gameIsFinished = false;
-  Widget animationWidget = Container();
-
   @override
   Widget build(BuildContext context) {
     final numberOfPlayers = widget.players.length;
@@ -65,7 +59,6 @@ class _PlayersLayoutState extends State<PlayersLayout> {
         ];
         showBottomRow = false;
         bottomChildren = [];
-
       case 2:
         topChildren = [
           Expanded(
@@ -188,112 +181,42 @@ class _PlayersLayoutState extends State<PlayersLayout> {
         ];
     }
 
-    return BlocConsumer<GameBloc, GameState>(
-      listener: (context, state) {
-        if (state.status == GameStatus.transitioning) {
-          setState(() {
-            if (state.lastAction != null) {
-              animationWidget = AnimatedTextKit(
-                totalRepeatCount: 1,
-                onFinished: () {
-                  print('on finished');
-                  setState(() {
-                    animationWidget = Container();
-                    context.read<GameBloc>().add(TurnCompleted());
-                  });
-                },
-                animatedTexts: [
-                  FadeAnimatedText(
-                    (state.lastAction!['type'] as String).toUpperCase(),
-                    textStyle: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    duration: const Duration(milliseconds: 3000),
-                  ),
-                ],
-              );
-            }
-          });
-        }
-        if (state.status == GameStatus.finished) {
-          setState(() {
-            animationWidget = AnimatedTextKit(
-              totalRepeatCount: 1,
-              onFinished: () {
-                setState(() {
-                  animationWidget = Container();
-                  context.read<GameBloc>().add(GameCompleted());
-                  context.go('/lobby/${state.lobbyId}');
-                });
-              },
-              animatedTexts: [
-                FadeAnimatedText(
-                  'GAME OVER!'.toUpperCase(),
-                  textStyle: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  duration: const Duration(milliseconds: 3000),
-                ),
-                ScaleAnimatedText(
-                  'WINNER: ${state.winner!}'.toUpperCase(),
-                  textStyle: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  duration: const Duration(milliseconds: 5000),
-                ),
-              ],
-            );
-          });
-        }
-      },
+    return BlocBuilder<GameBloc, GameState>(
       builder: (context, state) {
-        if (state.turn == 0) {
-          context.read<GameBloc>().add(RoundStart());
-        }
-        return SafeArea(
-          child: Stack(
-            children: [
-              Flex(
-                direction: Axis.vertical,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: Center(
-                      child: Flex(
-                        direction: Axis.horizontal,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: topChildren,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: Flex(
-                        direction: Axis.horizontal,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: middleChildren,
-                      ),
-                    ),
-                  ),
-                  if (showBottomRow)
-                    Expanded(
-                      child: Flex(
-                        mainAxisSize: MainAxisSize.min,
-                        direction: Axis.horizontal,
-                        //crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: bottomChildren,
-                      ),
-                    ),
-                ],
+        return Flex(
+          direction: Axis.vertical,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: Center(
+                child: Flex(
+                  direction: Axis.horizontal,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: topChildren,
+                ),
               ),
-              Center(child: animationWidget),
-            ],
-          ),
+            ),
+            Expanded(
+              child: Center(
+                child: Flex(
+                  direction: Axis.horizontal,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: middleChildren,
+                ),
+              ),
+            ),
+            if (showBottomRow)
+              Expanded(
+                child: Flex(
+                  mainAxisSize: MainAxisSize.min,
+                  direction: Axis.horizontal,
+                  //crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: bottomChildren,
+                ),
+              ),
+          ],
         );
       },
     );

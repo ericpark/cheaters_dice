@@ -8,17 +8,21 @@ import 'package:cheaters_dice/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:lobby_repository/lobby_repository.dart';
 
 class App extends StatelessWidget {
   const App({
     required AuthRepository authRepository,
     required GameRepository gameRepository,
+    required LobbyRepository lobbyRepository,
     super.key,
   })  : _authRepository = authRepository,
-        _gameRepository = gameRepository;
+        _gameRepository = gameRepository,
+        _lobbyRepository = lobbyRepository;
 
   final AuthRepository _authRepository;
   final GameRepository _gameRepository;
+  final LobbyRepository _lobbyRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +31,7 @@ class App extends StatelessWidget {
       providers: [
         RepositoryProvider.value(value: _authRepository),
         RepositoryProvider.value(value: _gameRepository),
+        RepositoryProvider.value(value: _lobbyRepository),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -40,7 +45,9 @@ class App extends StatelessWidget {
                 GameBloc(gameRepository: context.read<GameRepository>()),
           ),
           BlocProvider(
-            create: (context) => LobbyCubit()..init(),
+            create: (context) =>
+                LobbyCubit(lobbyRepository: context.read<LobbyRepository>())
+                  ..init(),
             lazy: false,
           ),
         ],

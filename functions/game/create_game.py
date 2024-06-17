@@ -42,6 +42,6 @@ def create_game(req: https_fn.CallableRequest):
         'total_dice': req.data['starting_dice'] * len(req.data['players']),
     }
     firestore.client().collection('games').document(game_id).set(game_data)
-    firestore.client().collection('lobbies').document(lobby_id).update({'game_id': game_id})
+    firestore.client().collection('lobbies').document(lobby_id).update({'game_id': game_id,'status': 'playing'})
 
     return {'game_id': game_id}

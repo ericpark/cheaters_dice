@@ -6,6 +6,7 @@ import 'package:bloc/bloc.dart';
 import 'package:cheaters_dice/app/helpers/converters.dart';
 import 'package:cheaters_dice/game/game.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:game_repository/game_repository.dart' as game_repository;
@@ -21,13 +22,15 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         super(GameState.initial()) {
     //on<GameEvent>(_onGameEvent);
     on<GameStart>(_onGameStart);
-    on<GameStateUpdate>(_onGameStateUpdate);
+    on<GameStateUpdate>(_onGameUpdate);
     on<RoundStart>(_onRoundStart);
+    on<ProcessTurnStart>(_onProcessTurnStart);
     on<PlayerActionGameEvent>(_onPlayerAction);
     on<PlayerUpdateUserBidGameEvent>(_onPlayerUpdateBid);
     on<PlayerSubmitBidGameEvent>(_onPlayerSubmitBid);
     on<PlayerSubmitLiarGameEvent>(_onPlayerLiar);
     on<PlayerSubmitSpotOnGameEvent>(_onPlayerSpotOn);
+    on<AnimationCompleted>(_onAnimationCompleted);
     on<TurnCompleted>(_onTurnComplete);
     on<GameCompleted>(_onGameComplete);
   }
@@ -38,18 +41,40 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   void init(String userId, String gameId) {
     add(GameStart(userId: userId, gameId: gameId));
-    add(RoundStart());
+    //add(RoundStart());
   }
 
   FutureOr<void> _onGameStart(GameStart event, Emitter<GameState> emit) async {
+    debugPrint('Game Start: ${event.gameId}');
+    // Close any existing game streams
     await _gameStream?.cancel();
+
+    // Initialize a new game with the host as first player.
     emit(
-      GameState.initial().copyWith(
-        status: GameStatus.initial,
-        currentUserId: event.userId,
-      ),
+      GameState.initial()
+          .copyWith(id: event.gameId, currentUserId: event.userId),
     );
-    print("game started---------");
+
+    _gameStream = await _gameRepository.getGameStream(
+      gameId: event.gameId,
+      onData: (Game? game) {
+        add(GameStateUpdate(game: game));
+      },
+    );
+
+    // Wait for the game to load
+    emit(state.copyWith(status: GameStatus.loading));
+  }
+
+  /// Load Games for other players besides the host.
+  FutureOr<void> _onGameLoad(GameStart event, Emitter<GameState> emit) async {
+    debugPrint('Game Load: ${event.gameId}');
+    // Close any existing game streams
+    await _gameStream?.cancel();
+
+    // Wait for the game to load
+    emit(state.copyWith(status: GameStatus.loading));
+
     _gameStream = await _gameRepository.getGameStream(
       gameId: event.gameId,
       onData: (Game? game) {
@@ -58,66 +83,74 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
-  FutureOr<void> _onGameStateUpdate(
+  FutureOr<void> _onGameUpdate(
     GameStateUpdate event,
     Emitter<GameState> emit,
   ) async {
     if (event.game == null) return null;
 
-    final updatedGame = GameState.fromJson(event.game?.toJson() ?? {});
-    final players = updatedGame.tableOrder
-        .map((playerId) => updatedGame.players[playerId]!)
+    final serverGameState = GameState.fromJson(event.game?.toJson() ?? {})
+        .copyWith(currentUserId: state.currentUserId);
+
+    if (state.status == GameStatus.loading) {
+      add(RoundStart(game: serverGameState));
+
+      //await Future<void>.delayed(const Duration(seconds: 5));
+
+      add(AnimationCompleted());
+    }
+
+    if (state.status == GameStatus.playing) {
+      // Make transition
+      add(ProcessTurnStart(game: serverGameState));
+    }
+
+    if (serverGameState.status == GameStatus.finished) {
+      await Future<void>.delayed(const Duration(seconds: 5));
+
+      emit(serverGameState.copyWith(status: GameStatus.finished));
+    }
+  }
+
+  FutureOr<void> _onProcessTurnStart(
+    ProcessTurnStart event,
+    Emitter<GameState> emit,
+  ) {
+    final players = event.game.tableOrder
+        .map((playerId) => event.game.players[playerId]!)
         .toList();
     final totalDice = players.fold<int>(
       0,
       (previousValue, player) => previousValue + player.dice.length,
     );
-
-    //emit(state.copyWith(status: GameStatus.transitioning));
-    final userBid = updatedGame.currentBid == const Bid(number: 1, value: 1)
-        ? const Bid(number: 1, value: 2)
-        : updatedGame.currentBid;
-    print('previous: ${state.round}');
-    print('next: ${updatedGame.round}');
-    if (state.round == updatedGame.round) {
-      emit(
-        updatedGame.copyWith(
-          status: GameStatus.transitioning,
-          totalDice: totalDice,
-          userBid: userBid,
-          currentUserId: state.currentUserId,
-        ),
-      );
-    } else {
-      print("NEW ROUND");
-
-      emit(
-        updatedGame.copyWith(
-          status: GameStatus.transitioning,
-          totalDice: totalDice,
-          userBid: userBid,
-          currentUserId: state.currentUserId,
-        ),
-      );
-    }
-
-    await Future<void>.delayed(const Duration(seconds: 5));
-    //print("done waiting");
-    //print(state);
-    //emit(state.copyWith(status: GameStatus.transitioning));
-
-    if (updatedGame.status == GameStatus.finished) {
-      emit(state.copyWith(status: GameStatus.finished));
-    }
+    final userBid = event.game.currentBid == Bid.initial()
+        ? Bid.minimum()
+        : event.game.currentBid;
+    emit(
+      event.game.copyWith(
+        userBid: userBid,
+        totalDice: totalDice,
+        status: GameStatus.transitioning,
+      ),
+    );
   }
 
-  FutureOr<void> _onRoundStart(event, Emitter<GameState> emit) {
+  FutureOr<void> _onRoundStart(RoundStart event, Emitter<GameState> emit) {
+    final players = event.game.tableOrder
+        .map((playerId) => event.game.players[playerId]!)
+        .toList();
+    final totalDice = players.fold<int>(
+      0,
+      (previousValue, player) => previousValue + player.dice.length,
+    );
+    final userBid = event.game.currentBid == Bid.initial()
+        ? Bid.minimum()
+        : event.game.currentBid;
     emit(
-      state.copyWith(
-        status: GameStatus.playing,
-        //totalDice: 10,
-        //userBid: Bid.minimum(),
-        // order: order,
+      event.game.copyWith(
+        userBid: userBid,
+        totalDice: totalDice,
+        status: GameStatus.transitioning,
       ),
     );
   }
@@ -241,6 +274,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(state.copyWith(status: GameStatus.playing, lastAction: null));
   }
 
+  FutureOr<void> _onAnimationCompleted(event, Emitter<GameState> emit) async {
+    emit(state.copyWith(status: GameStatus.playing));
+  }
+
+  /// Reset the game state to initial before going back to lobby
   FutureOr<void> _onGameComplete(event, Emitter<GameState> emit) async {
     emit(GameState.initial());
   }

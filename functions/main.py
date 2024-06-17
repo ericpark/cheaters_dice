@@ -8,6 +8,7 @@ import google.cloud.firestore
 
 from game.create_game import *
 from game.update_game import *
+from lobby.create_lobby import *
 
 app = initialize_app()
 # [END import]

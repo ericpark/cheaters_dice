@@ -1,5 +1,7 @@
 import 'package:cheaters_dice/auth/auth.dart';
 import 'package:cheaters_dice/game/view/game_page.dart';
+import 'package:cheaters_dice/home/view/home_page.dart';
+import 'package:cheaters_dice/leaderboard/view/views.dart';
 import 'package:cheaters_dice/lobby/view/views.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -13,8 +15,52 @@ GoRouter mainRouter(AuthState authState) => GoRouter(
           pageBuilder: (context, GoRouterState state) {
             return CustomTransitionPage<void>(
               key: state.pageKey,
-              child: const LobbyPage(),
+              child: const HomePage(),
               transitionDuration: const Duration(milliseconds: 1000),
+              transitionsBuilder: (
+                context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+                Widget child,
+              ) {
+                return FadeTransition(
+                  opacity:
+                      CurveTween(curve: Curves.easeInOut).animate(animation),
+                  child: child,
+                );
+              },
+            );
+          },
+        ),
+        GoRoute(
+          path: '/lobby',
+          pageBuilder: (context, GoRouterState state) {
+            return CustomTransitionPage<void>(
+              key: state.pageKey,
+              child: const LobbyPage(),
+              transitionDuration: const Duration(milliseconds: 500),
+              transitionsBuilder: (
+                context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+                Widget child,
+              ) {
+                return FadeTransition(
+                  opacity:
+                      CurveTween(curve: Curves.easeInOut).animate(animation),
+                  child: child,
+                );
+              },
+            );
+          },
+        ),
+        GoRoute(
+          path: '/leaderboard',
+          pageBuilder: (context, GoRouterState state) {
+            return CustomTransitionPage<void>(
+              key: state.pageKey,
+              child: const LeaderboardPage(),
+              transitionDuration: const Duration(milliseconds: 500),
               transitionsBuilder: (
                 context,
                 Animation<double> animation,
@@ -37,7 +83,16 @@ GoRouter mainRouter(AuthState authState) => GoRouter(
         GoRoute(
           name: 'lobby',
           path: '/lobby/:lobbyId',
-          builder: (context, state) => const JoinedLobbyPage(),
+          builder: (context, state) => JoinedLobbyPage(
+            lobbyId: state.pathParameters['lobbyId'] ?? '',
+          ),
+        ),
+        GoRoute(
+          name: 'lobby_settings',
+          path: '/lobby/:lobbyId/settings',
+          builder: (context, state) => LobbySettingPage(
+            lobbyId: state.pathParameters['lobbyId'] ?? '',
+          ),
         ),
         GoRoute(
           name: 'game',

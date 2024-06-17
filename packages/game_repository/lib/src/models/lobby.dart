@@ -13,6 +13,7 @@ enum LobbyStatus { initial, waiting, playing, transitioning, finished, failure }
 @FirestoreConverter(defaultPath: 'lobbies')
 class Lobby with _$Lobby {
   factory Lobby({
+    String? gameId,
     String? hostId,
     String? id,
     @Default([]) List<String> order,

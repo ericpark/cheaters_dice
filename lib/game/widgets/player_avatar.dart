@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cheaters_dice/game/game.dart';
 import 'package:flutter/material.dart';
 
@@ -29,15 +30,15 @@ class PlayerAvatar extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   child: CircleAvatar(
                     radius: constraints.maxHeight * 0.90,
-                    backgroundColor: Colors.blue,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        player.name.toString(),
-                        style: const TextStyle(
-                          fontSize: 48,
-                          color: Colors.white,
-                        ),
+                    //backgroundColor: Colors.blue,
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl:
+                            'https://firebasestorage.googleapis.com/v0/b/cheaters-dice.appspot.com/o/aussie.jpg?alt=media&token=090a5254-2ca9-4271-8f18-5bf0c73094a8',
+                        placeholder: (context, url) =>
+                            const CircularProgressIndicator(),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.error),
                       ),
                     ),
                   ),

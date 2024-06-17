@@ -1,3 +1,4 @@
+import 'package:cheaters_dice/app/widgets/widgets.dart';
 import 'package:cheaters_dice/lobby/lobby.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,39 +22,50 @@ class LobbyView extends StatelessWidget {
       builder: (BuildContext context, BoxConstraints constraints) {
         return BlocBuilder<LobbyCubit, LobbyState>(
           builder: (context, state) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Available Lobbies:'),
-                  SizedBox(
-                    height: constraints.maxHeight * 0.7,
-                    width: constraints.maxWidth * 0.7,
-                    child: ListView.builder(
-                      itemCount: state.availableLobbies.length,
-                      itemBuilder: (context, index) {
-                        final lobby = state.availableLobbies[index];
-                        return ListTile(
-                          title: Text(lobby.name),
-                          subtitle: Text('Players: ${lobby.players}'),
-                          trailing: ElevatedButton(
-                            onPressed: () {
-                              context.read<LobbyCubit>().joinLobby(lobby.id);
-                              if (state.status == LobbyStatus.playing) {
-                                const gameId = '46hOQ2pQ26C4aIx6iAWF';
-                                context.go('/game/$gameId');
-                              } else {
-                                context.go('/lobby/${lobby.id}');
-                              }
-                            },
-                            child: const Text('Join'),
-                          ),
-                        );
-                      },
+            return Scaffold(
+              appBar: AppBar(title: const Text('Available Lobbies:')),
+              bottomNavigationBar: const BottomBar(initialActiveIndex: 1),
+              body: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: constraints.maxHeight * 0.7,
+                      width: constraints.maxWidth * 0.7,
+                      child: ListView.builder(
+                        itemCount: state.availableLobbies.length,
+                        itemBuilder: (context, index) {
+                          final lobby = state.availableLobbies[index];
+                          return ListTile(
+                            title: Text(lobby.name),
+                            subtitle:
+                                Text('Players: ${lobby.players.keys.length}'),
+                            trailing: ElevatedButton(
+                              onPressed: () async {
+                                final joinedLobby = await context
+                                    .read<LobbyCubit>()
+                                    .joinLobby(lobby.id);
+
+                                if (joinedLobby == null) return;
+
+                                if (joinedLobby.gameId != null &&
+                                    joinedLobby.status == LobbyStatus.playing) {
+                                  // ignore: use_build_context_synchronously
+                                  context.go('/game/${joinedLobby.gameId}');
+                                } else {
+                                  // ignore: use_build_context_synchronously
+                                  await context.push('/lobby/${lobby.id}');
+                                }
+                              },
+                              child: const Text('Join'),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },

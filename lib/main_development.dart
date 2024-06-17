@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:game_repository/game_repository.dart';
+import 'package:lobby_repository/lobby_repository.dart';
 
 void main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,7 @@ void main() async {
   );
   final db = FirebaseFirestore.instance;
   final gameRepository = GameRepository();
+  final lobbyRepository = LobbyRepository();
 
   //print(await gameRepository.getGameById(gameId: '46hOQ2pQ26C4aIx6iAWF'));
 
@@ -26,6 +28,7 @@ void main() async {
     () => App(
       authRepository: AuthRepository(firebaseDB: db),
       gameRepository: gameRepository,
+      lobbyRepository: lobbyRepository,
     ),
   );
 }
