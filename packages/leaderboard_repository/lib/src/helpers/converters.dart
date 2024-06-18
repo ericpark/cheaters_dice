@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:leaderboard_repository/leaderboard_repository.dart';
 
 class DateTimeConverter implements JsonConverter<DateTime, dynamic> {
   const DateTimeConverter();

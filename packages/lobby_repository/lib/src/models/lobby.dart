@@ -7,7 +7,15 @@ part 'generated/lobby.g.dart';
 part 'generated/lobby.firestore_converter.dart';
 part 'generated/lobby.freezed.dart';
 
-enum LobbyStatus { initial, waiting, playing, transitioning, finished, failure }
+enum LobbyStatus {
+  initial,
+  waiting,
+  loading,
+  playing,
+  transitioning,
+  finished,
+  failure
+}
 
 @freezed
 @FirestoreConverter(defaultPath: 'lobbies')
@@ -22,6 +30,7 @@ class Lobby with _$Lobby {
     @DateTimeNullableConverter() DateTime? createdAt,
     @PlayersConverter() @Default({}) Map<String, Player> players,
     @Default({}) Map<String, dynamic> settings,
+    String? name,
   }) = _Lobby;
 
   factory Lobby.fromJson(Map<String, dynamic> json) => _$LobbyFromJson(json);

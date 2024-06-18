@@ -47,8 +47,8 @@ def update_game_from_action(event: firestore_fn.Event[firestore_fn.DocumentSnaps
     is_finished = _check_game_is_finished(game_data=update_data)
     if is_finished: 
         update_data["status"] = "finished"
-    if is_finished: 
         update_data["winner"] = update_data["order"][0]
+        firestore.client().collection('lobbies').document(game_data["lobby_id"]).update({'game_id': None,'status': 'waiting'})
 
     update_data["last_action"] = {"id": last_action_data["id"], "type": last_action_data["action_type"]}
     #Update the game in the database. This will push all the new state to the players.
@@ -78,8 +78,13 @@ def _handle_challenge_action(action_data: dict, game_data: dict, firestore_clien
 
     challenger_is_correct = last_bid["number"] > actual_dice_count
     round_results = {}
+    
+    #default = next player is the challenger (player who called liar)
+    next_player_id = action_data["player_id"]
+
     #if challenger is correct, remove dice from player
     if(challenger_is_correct):
+        next_player_id = last_bid["player_id"]
         players[last_bid["player_id"]]["dice"] = players[last_bid["player_id"]]["dice"][:-1]
         game_data["players"][last_bid["player_id"]]["dice"] = players[last_bid["player_id"]]["dice"]
         if len(players[last_bid["player_id"]]["dice"]) == 0:
@@ -96,7 +101,10 @@ def _handle_challenge_action(action_data: dict, game_data: dict, firestore_clien
 
     #calculate the new remaining dice count
     game_data["total_dice"] = sum([len(player["dice"]) for player in players.values()])
-
+    #Uses the order then table_order to determine the next player. Offset is not used because the loser will always go next
+    if(len( game_data["order"]) > 1):
+        game_data["order"] = _update_player_order(order=game_data["order"], table_order=game_data["table_order"], next_player=next_player_id, offset=False)
+    
     #Save the game state as a round record
     _save_game_as_round(firestore_client=firestore_client, game_id=action_data["game_id"], game_data=game_data, round_results=round_results)
 
@@ -115,6 +123,9 @@ def _handle_spot_on_action(action_data: dict, game_data: dict, firestore_client:
 
     challenger_is_correct = last_bid["number"] == actual_dice_count
     round_results = {}
+
+    #default = next player is the challenger (player who called spot on)
+    next_player_id = action_data["player_id"]
     #if challenger is correct, remove dice from all players
     if(challenger_is_correct):
         for player_id, player in players.items():
@@ -130,9 +141,12 @@ def _handle_spot_on_action(action_data: dict, game_data: dict, firestore_client:
         game_data["players"][action_data["player_id"]]["dice"] = players[action_data["player_id"]]["dice"]
         if len(players[action_data["player_id"]]["dice"]) == 0:
             game_data["order"].remove(action_data["player_id"])
-
+    
     #calculate the new remaining dice count
     game_data["total_dice"] = sum([len(player["dice"]) for player in players.values()])
+    #Uses the order then table_order to determine the next player. Offset is used here because if the challenger is correct, the next player is immediately after challenger
+    if(len( game_data["order"]) > 1):
+        game_data["order"] = _update_player_order(order=game_data["order"], table_order=game_data["table_order"], next_player=next_player_id, offset=challenger_is_correct)
 
     #Save the game state as a round record
     _save_game_as_round(firestore_client=firestore_client, game_id=action_data["game_id"], game_data=game_data, round_results=round_results)
@@ -175,6 +189,22 @@ def _actual_dice_count(players: dict, bid_value: int) -> int:
     return actual_dice_count
 # [END _actual_dice_count]
 
+# [START _update_player_order]
+def _update_player_order(order: list, table_order:list, next_player: str, offset: bool) -> list:
+    
+    starting_index = 0
+    starting_player = next_player
+    #Find the next player in the table order and set that as the starting player if the next player is not in the order
+    while(starting_player not in order):
+        next_available_index = table_order.index(starting_player)
+        next_available_index = (next_available_index + 1)%len(table_order)
+        starting_player = table_order[next_available_index]
+
+    starting_index = order.index(starting_player)
+    starting_index = (starting_index + 1)%len(order) if offset and next_player == starting_player else starting_index
+    order = order[starting_index:] + order[:starting_index]
+    return order
+# [END _update_player_order]
 
 # [START _rerollAllPlayersDice]
 def _rerollAllPlayersDice(players: dict) -> dict:

@@ -17,7 +17,7 @@ class LobbyCubit extends Cubit<LobbyState> {
         super(LobbyState.initial());
 
   final lobby_repository.LobbyRepository _lobbyRepository;
-  StreamSubscription<DocumentSnapshot<Lobby>>? _lobbyStream;
+  StreamSubscription<DocumentSnapshot<lobby_repository.Lobby>>? _lobbyStream;
 
   void init() {
     emit(
@@ -29,7 +29,7 @@ class LobbyCubit extends Cubit<LobbyState> {
             players: {},
           ),
           Lobby(
-            id: '46hOQ2pQ26C4aIx6iAWF',
+            id: 'OoYiN0d1AEzhWy7CYqUV',
             name: 'Lobby 2',
             players: {},
           ),
@@ -42,15 +42,24 @@ class LobbyCubit extends Cubit<LobbyState> {
     final joinedLobby = Lobby.fromJson(
       (await _lobbyRepository.getLobbyById(lobbyId: lobbyId))!.toJson(),
     );
-    /*_lobbyStream = _lobbyRepository.getLobbyStream(
+    await _lobbyStream?.cancel();
+
+    _lobbyStream = await _lobbyRepository.getLobbyStream(
       lobbyId: lobbyId,
-      onData: (lobby) {
+      onData: (lobby) async {
         if (lobby != null) {
-          emit(state.copyWith(joinedLobby: lobby));
+          final lobbyStream = Lobby.fromJson(lobby.toJson());
+
+          emit(
+            state.copyWith(
+              joinedLobby: lobbyStream,
+              joinedLobbyId: lobbyId,
+              status: joinedLobby.status,
+            ),
+          );
         }
       },
-    ) as StreamSubscription<DocumentSnapshot<Lobby>>?;*/
-    print('Joined lobby: $joinedLobby');
+    );
     emit(
       state.copyWith(
         joinedLobbyId: lobbyId,
@@ -61,11 +70,13 @@ class LobbyCubit extends Cubit<LobbyState> {
     return joinedLobby;
   }
 
-  Future<String> createGame(
+  Future<String> startGame(
     String lobbyId,
     String hostId,
     List<String> players,
   ) async {
+    await _lobbyRepository
+        .updateLobbyById(lobbyId: lobbyId, data: {'status': 'loading'});
     final callable = FirebaseFunctions.instance.httpsCallable(
       'create_game',
       options: HttpsCallableOptions(

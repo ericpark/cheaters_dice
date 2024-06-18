@@ -18,7 +18,7 @@ class GamePage extends StatelessWidget {
           case GameStatus.initial:
             context
                 .read<GameBloc>()
-                .add(GameStart(userId: currentUserId, gameId: gameId));
+                .add(GameLoad(userId: currentUserId, gameId: gameId));
 
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),

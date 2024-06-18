@@ -32,6 +32,20 @@ class LobbyRepository {
     }
   }
 
+  Future<void> updateLobbyById({
+    required String lobbyId,
+    required Map<String, dynamic> data,
+  }) async {
+    if (lobbyId == '') return;
+    final lobbyRef = lobbyDoc(docId: lobbyId);
+
+    try {
+      await lobbyRef.update(data);
+    } catch (err) {
+      debugPrint('Error while updating lobby: $err');
+    }
+  }
+
   Future<StreamSubscription<DocumentSnapshot<Lobby>>?> getLobbyStream({
     required String lobbyId,
     required void Function(Lobby? game) onData,

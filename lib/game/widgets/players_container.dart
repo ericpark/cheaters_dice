@@ -61,8 +61,8 @@ class _PlayersContainerState extends State<PlayersContainer> {
               onFinished: () {
                 setState(() {
                   animationWidget = Container();
-                  context.read<GameBloc>().add(GameCompleted());
                   context.go('/lobby/${state.lobbyId}');
+                  context.read<GameBloc>().add(GameCompleted());
                 });
               },
               animatedTexts: [

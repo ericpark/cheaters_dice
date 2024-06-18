@@ -22,8 +22,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         super(GameState.initial()) {
     //on<GameEvent>(_onGameEvent);
     on<GameStart>(_onGameStart);
+    on<GameLoad>(_onGameLoad);
     on<GameStateUpdate>(_onGameUpdate);
     on<RoundStart>(_onRoundStart);
+    on<RolledDice>(_onRolledDice);
     on<ProcessTurnStart>(_onProcessTurnStart);
     on<PlayerActionGameEvent>(_onPlayerAction);
     on<PlayerUpdateUserBidGameEvent>(_onPlayerUpdateBid);
@@ -67,13 +69,15 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   /// Load Games for other players besides the host.
-  FutureOr<void> _onGameLoad(GameStart event, Emitter<GameState> emit) async {
+  FutureOr<void> _onGameLoad(GameLoad event, Emitter<GameState> emit) async {
     debugPrint('Game Load: ${event.gameId}');
     // Close any existing game streams
     await _gameStream?.cancel();
 
-    // Wait for the game to load
-    emit(state.copyWith(status: GameStatus.loading));
+    emit(
+      GameState.initial()
+          .copyWith(id: event.gameId, currentUserId: event.userId),
+    );
 
     _gameStream = await _gameRepository.getGameStream(
       gameId: event.gameId,
@@ -81,6 +85,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         add(GameStateUpdate(game: game));
       },
     );
+
+    // Wait for the game to load
+    emit(state.copyWith(status: GameStatus.loading));
   }
 
   FutureOr<void> _onGameUpdate(
@@ -89,9 +96,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   ) async {
     if (event.game == null) return null;
 
-    final serverGameState = GameState.fromJson(event.game?.toJson() ?? {})
-        .copyWith(currentUserId: state.currentUserId);
-
+    final serverGameState =
+        GameState.fromJson(event.game?.toJson() ?? {}).copyWith(
+      currentUserId: state.currentUserId,
+      hasRolled: state.hasRolled,
+    );
     if (state.status == GameStatus.loading) {
       add(RoundStart(game: serverGameState));
 
@@ -99,14 +108,22 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       add(AnimationCompleted());
     }
-
-    if (state.status == GameStatus.playing) {
+    if (state.status == GameStatus.playing &&
+        serverGameState.status == GameStatus.playing &&
+        state.turn != 0 &&
+        serverGameState.turn == 0) {
+      print("NEW ROUND");
+      // Make transition
+      add(RoundStart(game: serverGameState));
+      add(AnimationCompleted());
+    } else if (state.status == GameStatus.playing &&
+        serverGameState.status == GameStatus.playing) {
       // Make transition
       add(ProcessTurnStart(game: serverGameState));
     }
 
     if (serverGameState.status == GameStatus.finished) {
-      await Future<void>.delayed(const Duration(seconds: 5));
+      //await Future<void>.delayed(const Duration(seconds: 5));
 
       emit(serverGameState.copyWith(status: GameStatus.finished));
     }
@@ -135,7 +152,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
-  FutureOr<void> _onRoundStart(RoundStart event, Emitter<GameState> emit) {
+  FutureOr<void> _onRoundStart(
+      RoundStart event, Emitter<GameState> emit) async {
     final players = event.game.tableOrder
         .map((playerId) => event.game.players[playerId]!)
         .toList();
@@ -146,11 +164,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final userBid = event.game.currentBid == Bid.initial()
         ? Bid.minimum()
         : event.game.currentBid;
+
     emit(
       event.game.copyWith(
         userBid: userBid,
         totalDice: totalDice,
         status: GameStatus.transitioning,
+        hasRolled: false,
       ),
     );
   }
@@ -352,5 +372,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final players = order.map((playerId) => state.players[playerId]!).toList();
 
     return players;
+  }
+
+  FutureOr<void> _onRolledDice(event, Emitter<GameState> emit) async {
+    print(state.hasRolled);
+    emit(state.copyWith(hasRolled: true));
   }
 }

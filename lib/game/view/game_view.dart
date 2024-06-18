@@ -8,8 +8,7 @@ class GameViewMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('making game view mobile');
-    final temp = context.read<GameBloc>().playerOrder;
+    final playerOrder = context.read<GameBloc>().playerOrder;
 
     return Scaffold(
       appBar: AppBar(
@@ -17,7 +16,7 @@ class GameViewMobile extends StatelessWidget {
         leading: IconButton(
           onPressed: () {
             //context.read<GameBloc>().add(const GameQuitGameEvent());
-            context.go('/');
+            context.pop();
           },
           icon: const Icon(Icons.close),
         ),
@@ -42,17 +41,20 @@ class GameViewMobile extends StatelessWidget {
                                 state.order[state.turn % state.order.length],
                             players:
                                 context.read<GameBloc>().playerOrder.isNotEmpty
-                                    ? temp
+                                    ? playerOrder
                                     : [],
                           ),
                         ),
                       ),
                     ),
-                    const Expanded(
+                    Expanded(
                       flex: 2,
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: PlayerDice(),
+                        child: PlayerDice(
+                          hasRolled: state.hasRolled ?? false,
+                          dice: state.players[state.currentUserId]!.dice,
+                        ),
                       ),
                     ),
                     //const Divider(height: 8, endIndent: 50, indent: 50),
@@ -64,26 +66,6 @@ class GameViewMobile extends StatelessWidget {
           },
         ),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(8),
-        child: FloatingActionButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          mini: true,
-          onPressed: () {
-            context.read<GameBloc>().add(
-                  const PlayerUpdateUserBidGameEvent(
-                    bidPart: BidPart.number,
-                    bidType: BidUpdateType.increment,
-                  ),
-                );
-            context.read<GameBloc>().add(const PlayerSubmitBidGameEvent());
-          },
-          child: const Icon(Icons.settings),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 }

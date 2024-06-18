@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cheaters_dice/constants.dart';
 import 'package:cheaters_dice/game/game.dart';
 import 'package:flutter/material.dart';
 
@@ -18,34 +19,32 @@ class PlayerAvatar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             direction: Axis.vertical,
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: active ? Colors.green : Colors.black,
-                    width: 2,
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: active ? Colors.green : Colors.black,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(constraints.maxHeight),
                   ),
-                  borderRadius: BorderRadius.circular(constraints.maxHeight),
-                ),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: CircleAvatar(
-                    radius: constraints.maxHeight * 0.90,
-                    //backgroundColor: Colors.blue,
-                    child: ClipOval(
-                      child: CachedNetworkImage(
-                        imageUrl:
-                            'https://firebasestorage.googleapis.com/v0/b/cheaters-dice.appspot.com/o/aussie.jpg?alt=media&token=090a5254-2ca9-4271-8f18-5bf0c73094a8',
-                        placeholder: (context, url) =>
-                            const CircularProgressIndicator(),
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.error),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: CircleAvatar(
+                      maxRadius: constraints.maxHeight * 0.80,
+                      child: ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: AppConstants.defaultProfilePictureUrl,
+                          placeholder: (context, url) =>
+                              const CircularProgressIndicator(),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.error),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-
-              //SizedBox(height: constraints.maxHeight * 0.05),
               Flexible(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,

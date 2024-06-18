@@ -3,29 +3,53 @@ import 'package:cheaters_dice/game/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class PlayerDice extends StatelessWidget {
-  const PlayerDice({
-    super.key,
-  });
+class PlayerDice extends StatefulWidget {
+  const PlayerDice({required this.dice, required this.hasRolled, super.key});
+
+  final bool hasRolled;
+  final List<Die> dice;
+
+  @override
+  State<PlayerDice> createState() => _PlayerDiceState();
+}
+
+class _PlayerDiceState extends State<PlayerDice> {
+  bool hasRolled = false;
+
+  @override
+  void initState() {
+    hasRolled = widget.hasRolled;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = context.read<AuthCubit>().state.user?.id;
+    print('hasRolled: $hasRolled widget: ${widget.hasRolled}  ');
+    if (hasRolled != widget.hasRolled) {
+      setState(() {
+        hasRolled = widget.hasRolled;
+      });
+    }
 
-    return BlocBuilder<GameBloc, GameState>(
-      builder: (context, state) {
-        return Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: state.players[currentUser]!.dice
-                .map((d) => Dice(value: d.value))
-                .toList(),
-            //..add(Dice(value: 2))
-            //..add(Dice(value: 2))
-            //..add(Dice(value: 2)),
-          ),
-        );
-      },
+    if (!hasRolled) {
+      return Center(
+        child: ElevatedButton(
+          onPressed: () {
+            setState(() {
+              hasRolled = true;
+              context.read<GameBloc>().add(RolledDice());
+            });
+          },
+          child: const Text('Roll Dice'),
+        ),
+      );
+    }
+
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: widget.dice.map((d) => Dice(value: d.value)).toList(),
+      ),
     );
   }
 }

@@ -16,6 +16,13 @@ class GameStart extends GameEvent {
   final String gameId;
 }
 
+class GameLoad extends GameEvent {
+  const GameLoad({required this.userId, required this.gameId});
+
+  final String userId;
+  final String gameId;
+}
+
 class GameStateUpdate extends GameEvent {
   const GameStateUpdate({required this.game});
 
@@ -30,6 +37,9 @@ class RoundStart extends GameEvent {
   const RoundStart({required this.game});
   final GameState game;
 }
+
+
+class RolledDice extends GameEvent {}
 
 /// Turn Start:
 ///

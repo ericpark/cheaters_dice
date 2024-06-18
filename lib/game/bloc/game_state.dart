@@ -37,6 +37,7 @@ abstract class GameState with _$GameState {
     @PlayersConverter() @Default({}) Map<String, Player> players,
     @Default('') String? currentUserId, // Current User Id
     Map<String, dynamic>? lastAction,
+    bool? hasRolled,
     // Last Action Id
   }) = _GameState;
 

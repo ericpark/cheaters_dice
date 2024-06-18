@@ -52,7 +52,8 @@ class LobbyView extends StatelessWidget {
                                 if (joinedLobby.gameId != null &&
                                     joinedLobby.status == LobbyStatus.playing) {
                                   // ignore: use_build_context_synchronously
-                                  context.go('/game/${joinedLobby.gameId}');
+                                  await context
+                                      .push('/game/${joinedLobby.gameId}');
                                 } else {
                                   // ignore: use_build_context_synchronously
                                   await context.push('/lobby/${lobby.id}');
