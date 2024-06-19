@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cheaters_dice/game/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,214 +11,82 @@ class PlayersLayout extends StatefulWidget {
     super.key,
   });
 
+  final String activePlayerId;
+
   /// A list of other players in the game in order of play.
   /// This should not include the current player.
   final List<Player> players;
-  final String activePlayerId;
 
   @override
   State<PlayersLayout> createState() => _PlayersLayoutState();
 }
 
 class _PlayersLayoutState extends State<PlayersLayout> {
-  @override
-  Widget build(BuildContext context) {
-    final numberOfPlayers = widget.players.length;
-    const infoWidget = GameInfo();
+  List<Widget> calculateCircleCoordinates(
+      int numberOfPoints, double avatarSize) {
+    final coordinates = <Widget>[];
 
-    var showBottomRow = true;
-    var topChildren = <Widget>[
-      Flexible(child: Container()),
-      const Expanded(child: SizedBox(width: 1)),
-      const Expanded(child: SizedBox(width: 1)),
-      const Expanded(child: SizedBox(width: 1)),
-      Flexible(child: Container()),
-    ];
-    var middleChildren = <Widget>[
-      const Expanded(child: SizedBox(width: 1)),
-      const Expanded(child: infoWidget),
-      const Expanded(child: SizedBox(width: 1)),
-    ];
-    var bottomChildren = <Widget>[
-      const Expanded(child: SizedBox(width: 1)),
-      const Expanded(child: infoWidget),
-      const Expanded(child: SizedBox(width: 1)),
-    ];
+    const radius = 1.0; // adjust the radius as needed
+    const centerX = 0.0; // adjust the center X coordinate as needed
+    const centerY = 0.0; // adjust the center Y coordinate as needed
+    const startAngle = 3.14159 / 2; // start angle at 3/2 pi
 
-    switch (numberOfPlayers) {
-      case 0:
-        break; // Shouldn't play with 1 player
-      case 1:
-        topChildren = [
-          Flexible(child: Container()),
-          Expanded(
+    for (var i = 1; i < numberOfPoints; i++) {
+      final angle = startAngle + (2 * 3.14159 * i / numberOfPoints);
+      final x = centerX + radius * cos(angle);
+      final y = centerY + radius * sin(angle);
+
+      coordinates.add(
+        Align(
+          alignment: Alignment(x, y),
+          child: SizedBox(
+            height: avatarSize,
+            width: avatarSize,
             child: PlayerAvatar(
               player: widget.players[0],
               active: widget.players[0].id == widget.activePlayerId,
             ),
           ),
-          Flexible(child: Container()),
-        ];
-        showBottomRow = false;
-        bottomChildren = [];
-      case 2:
-        topChildren = [
-          Expanded(
-            child: PlayerAvatar(
-              player: widget.players[0],
-              active: widget.players[0].id == widget.activePlayerId,
-            ),
-          ),
-          Expanded(
-            child: PlayerAvatar(
-              player: widget.players[1],
-              active: widget.players[1].id == widget.activePlayerId,
-            ),
-          ),
-        ];
-        showBottomRow = false;
-        bottomChildren = [];
-      case 3:
-        topChildren = [
-          Flexible(child: Container()),
-          Expanded(
-            child: PlayerAvatar(
-              player: widget.players[1],
-              active: widget.players[1].id == widget.activePlayerId,
-            ),
-          ),
-          Flexible(child: Container()),
-        ];
-        bottomChildren = [
-          Expanded(
-            child: PlayerAvatar(
-              player: widget.players[0],
-              active: widget.players[0].id == widget.activePlayerId,
-            ),
-          ),
-          Flexible(child: Container()),
-          Expanded(
-            child: PlayerAvatar(
-              player: widget.players[2],
-              active: widget.players[2].id == widget.activePlayerId,
-            ),
-          ),
-        ];
-      case 4:
-        topChildren = [
-          Flexible(child: Container()),
-          Expanded(
-            flex: 2,
-            child: PlayerAvatar(
-              player: widget.players[1],
-              active: widget.players[1].id == widget.activePlayerId,
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: PlayerAvatar(
-              player: widget.players[2],
-              active: widget.players[2].id == widget.activePlayerId,
-            ),
-          ),
-          Flexible(child: Container()),
-        ];
-        middleChildren = [
-          Expanded(
-            child: PlayerAvatar(
-              player: widget.players[0],
-              active: widget.players[0].id == widget.activePlayerId,
-            ),
-          ),
-          const Expanded(child: infoWidget),
-          Expanded(
-            child: PlayerAvatar(
-              player: widget.players[3],
-              active: widget.players[3].id == widget.activePlayerId,
-            ),
-          ),
-        ];
-        showBottomRow = false;
-        bottomChildren = [];
-      case 5:
-        topChildren = [
-          Flexible(child: Container()),
-          Expanded(
-            child: PlayerAvatar(
-              player: widget.players[2],
-              active: widget.players[2].id == widget.activePlayerId,
-            ),
-          ),
-          Flexible(child: Container()),
-        ];
-        middleChildren = [
-          Expanded(
-            child: PlayerAvatar(
-              player: widget.players[1],
-              active: widget.players[1].id == widget.activePlayerId,
-            ),
-          ),
-          const Expanded(child: infoWidget),
-          Expanded(
-            child: PlayerAvatar(
-              player: widget.players[3],
-              active: widget.players[3].id == widget.activePlayerId,
-            ),
-          ),
-        ];
-        bottomChildren = [
-          Expanded(
-            child: PlayerAvatar(
-              player: widget.players[0],
-              active: widget.players[0].id == widget.activePlayerId,
-            ),
-          ),
-          Flexible(child: Container()),
-          Expanded(
-            child: PlayerAvatar(
-              player: widget.players[4],
-              active: widget.players[4].id == widget.activePlayerId,
-            ),
-          ),
-        ];
+        ),
+      );
     }
 
-    return BlocBuilder<GameBloc, GameState>(
-      builder: (context, state) {
-        return Flex(
-          direction: Axis.vertical,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: Center(
-                child: Flex(
-                  direction: Axis.horizontal,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: topChildren,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Center(
-                child: Flex(
-                  direction: Axis.horizontal,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: middleChildren,
-                ),
-              ),
-            ),
-            if (showBottomRow)
-              Expanded(
-                child: Flex(
-                  mainAxisSize: MainAxisSize.min,
-                  direction: Axis.horizontal,
-                  //crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: bottomChildren,
-                ),
-              ),
-          ],
+    return coordinates;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final numberOfPlayers = widget.players.length + 5;
+    const infoWidget = GameInfo();
+
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return BlocBuilder<GameBloc, GameState>(
+          builder: (context, state) {
+            final avatarSize = constraints.maxHeight > constraints.maxWidth
+                ? constraints.maxHeight * 0.3
+                : constraints.maxWidth * (1 / numberOfPlayers);
+
+            final avatars =
+                calculateCircleCoordinates(numberOfPlayers, avatarSize)
+                  ..add(
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: SizedBox(
+                        height: constraints.maxWidth * 0.3,
+                        width: constraints.maxWidth * 0.3,
+                        child: infoWidget,
+                      ),
+                    ),
+                  );
+
+            return Container(
+              width: double.infinity,
+              height: double.infinity,
+              alignment: Alignment.center,
+              child: Stack(children: avatars),
+            );
+          },
         );
       },
     );

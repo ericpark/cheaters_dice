@@ -11,23 +11,25 @@ class GameViewMobile extends StatelessWidget {
     final playerOrder = context.read<GameBloc>().playerOrder;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cheaters Dice'),
-        leading: IconButton(
-          onPressed: () {
-            //context.read<GameBloc>().add(const GameQuitGameEvent());
-            context.pop();
-          },
-          icon: const Icon(Icons.close),
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.all(8),
+          child: FloatingActionButton(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            mini: true,
+            onPressed: () {
+              context.pop();
+            },
+            child: const Icon(Icons.close),
+          ),
         ),
-      ),
-      body: ColoredBox(
-        color: Colors.grey.shade200,
-        child: BlocBuilder<GameBloc, GameState>(
-          builder: (context, state) {
-            return SafeArea(
-              bottom: false,
-              child: SizedBox.expand(
+        floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
+        body: ColoredBox(
+          color: Colors.grey.shade200,
+          child: BlocBuilder<GameBloc, GameState>(
+            builder: (context, state) {
+              return SizedBox.expand(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -35,18 +37,33 @@ class GameViewMobile extends StatelessWidget {
                     Expanded(
                       flex: 8,
                       child: SizedBox.expand(
-                        child: Center(
-                          child: PlayersContainer(
-                            activePlayerId:
-                                state.order[state.turn % state.order.length],
-                            players:
-                                context.read<GameBloc>().playerOrder.isNotEmpty
-                                    ? playerOrder
-                                    : [],
+                        child: Container(
+                          color: Colors.red,
+                          child: Stack(
+                            children: [
+                              Center(
+                                child: PlayersContainer(
+                                  activePlayerId: state
+                                      .order[state.turn % state.order.length],
+                                  players: context
+                                          .read<GameBloc>()
+                                          .playerOrder
+                                          .isNotEmpty
+                                      ? playerOrder
+                                      : [],
+                                ),
+                              ),
+                              const Positioned(
+                                bottom: 25,
+                                right: 25,
+                                child: PlayerTurnInfo(),
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ),
+
                     Expanded(
                       flex: 2,
                       child: FittedBox(
@@ -61,12 +78,10 @@ class GameViewMobile extends StatelessWidget {
                     const Expanded(flex: 2, child: PlayerActions()),
                   ],
                 ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
+              );
+            },
+          ),
+        ));
   }
 }
 

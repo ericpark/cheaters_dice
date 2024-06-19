@@ -36,6 +36,7 @@ dependencies:
   lobby_repository:
     path: packages/lobby_repository
   meta: ^1.12.0
+  super_cupertino_navigation_bar: ^2.1.2
   wolt_modal_sheet: ^0.6.0
 
 dev_dependencies:

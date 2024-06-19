@@ -10,6 +10,7 @@ class BottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConvexAppBar(
+      backgroundColor: Theme.of(context).primaryColor,
       style: TabStyle.react,
       items: const [
         TabItem(icon: Icons.home),
