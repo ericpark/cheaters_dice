@@ -45,48 +45,35 @@ class LobbyView extends StatelessWidget {
                   enabled: false,
                 ),
               ),
-              body: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: constraints.maxHeight * 0.7,
-                      width: constraints.maxWidth * 0.7,
-                      child: ListView.builder(
-                        itemCount: state.availableLobbies.length,
-                        itemBuilder: (context, index) {
-                          final lobby = state.availableLobbies[index];
-                          return ListTile(
-                            title: Text(lobby.name),
-                            subtitle:
-                                Text('Players: ${lobby.players.keys.length}'),
-                            trailing: ElevatedButton(
-                              onPressed: () async {
-                                final joinedLobby = await context
-                                    .read<LobbyCubit>()
-                                    .joinLobby(lobby.id);
+              body: ListView.builder(
+                shrinkWrap: true,
+                itemCount: state.availableLobbies.length,
+                itemBuilder: (context, index) {
+                  final lobby = state.availableLobbies[index];
+                  return ListTile(
+                    title: Text(lobby.name),
+                    subtitle: Text('Players: ${lobby.players.keys.length}'),
+                    trailing: ElevatedButton(
+                      onPressed: () async {
+                        final joinedLobby = await context
+                            .read<LobbyCubit>()
+                            .joinLobby(lobby.id);
 
-                                if (joinedLobby == null) return;
+                        if (joinedLobby == null) return;
 
-                                if (joinedLobby.gameId != null &&
-                                    joinedLobby.status == LobbyStatus.playing) {
-                                  // ignore: use_build_context_synchronously
-                                  await context
-                                      .push('/game/${joinedLobby.gameId}');
-                                } else {
-                                  // ignore: use_build_context_synchronously
-                                  await context.push('/lobby/${lobby.id}');
-                                }
-                              },
-                              child: const Text('Join'),
-                            ),
-                          );
-                        },
-                      ),
+                        if (joinedLobby.gameId != null &&
+                            joinedLobby.status == LobbyStatus.playing) {
+                          // ignore: use_build_context_synchronously
+                          await context.push('/game/${joinedLobby.gameId}');
+                        } else {
+                          // ignore: use_build_context_synchronously
+                          await context.push('/lobby/${lobby.id}');
+                        }
+                      },
+                      child: const Text('Join'),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             );
           },

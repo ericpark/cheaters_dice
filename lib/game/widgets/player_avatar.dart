@@ -20,18 +20,19 @@ class PlayerAvatar extends StatelessWidget {
             direction: Axis.vertical,
             children: [
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: active ? Colors.green : Colors.black,
-                      width: 2,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: active ? Colors.green : Colors.black,
+                        width: 2,
+                      ),
+                      borderRadius:
+                          BorderRadius.circular(constraints.maxHeight),
                     ),
-                    borderRadius: BorderRadius.circular(constraints.maxHeight),
-                  ),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
                     child: CircleAvatar(
-                      maxRadius: constraints.maxHeight * 0.80,
+                      maxRadius: constraints.maxWidth * 0.45,
                       child: ClipOval(
                         child: CachedNetworkImage(
                           imageUrl: AppConstants.defaultProfilePictureUrl,
@@ -45,21 +46,19 @@ class PlayerAvatar extends StatelessWidget {
                   ),
                 ),
               ),
-              Flexible(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    player.dice.length,
-                    (index) => Container(
-                      width: constraints.maxHeight * 0.1,
-                      height: constraints.maxHeight * 0.1,
-                      decoration: BoxDecoration(
-                        border: Border.all(),
-                        borderRadius:
-                            BorderRadius.circular(constraints.maxHeight * 0.02),
-                      ),
-                      margin: const EdgeInsets.all(4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  player.dice.length,
+                  (index) => Container(
+                    width: constraints.maxHeight * 0.1,
+                    height: constraints.maxHeight * 0.1,
+                    decoration: BoxDecoration(
+                      border: Border.all(),
+                      borderRadius:
+                          BorderRadius.circular(constraints.maxHeight * 0.02),
                     ),
+                    margin: const EdgeInsets.all(4),
                   ),
                 ),
               ),

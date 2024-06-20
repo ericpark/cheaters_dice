@@ -101,20 +101,32 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       currentUserId: state.currentUserId,
       hasRolled: state.hasRolled,
     );
+
+    // Initial Loading - should only be used once.
     if (state.status == GameStatus.loading) {
       add(RoundStart(game: serverGameState));
-
-      //await Future<void>.delayed(const Duration(seconds: 5));
-
       add(AnimationCompleted());
     }
     if (state.status == GameStatus.playing &&
         serverGameState.status == GameStatus.playing &&
         state.turn != 0 &&
         serverGameState.turn == 0) {
-      print("NEW ROUND");
       // Make transition
+      add(
+        ProcessTurnStart(
+          game: serverGameState.copyWith(players: state.players),
+        ),
+      );
+      await Future<void>.delayed(const Duration(seconds: 2));
+
+      add(AnimationCompleted());
+      await Future<void>.delayed(const Duration(seconds: 2));
+      add(ProcessTurnStart(game: serverGameState));
+      await Future<void>.delayed(const Duration(seconds: 2));
+
       add(RoundStart(game: serverGameState));
+      await Future<void>.delayed(const Duration(seconds: 2));
+
       add(AnimationCompleted());
     } else if (state.status == GameStatus.playing &&
         serverGameState.status == GameStatus.playing) {
@@ -153,7 +165,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   FutureOr<void> _onRoundStart(
-      RoundStart event, Emitter<GameState> emit) async {
+    RoundStart event,
+    Emitter<GameState> emit,
+  ) async {
     final players = event.game.tableOrder
         .map((playerId) => event.game.players[playerId]!)
         .toList();
@@ -375,7 +389,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   FutureOr<void> _onRolledDice(event, Emitter<GameState> emit) async {
-    print(state.hasRolled);
     emit(state.copyWith(hasRolled: true));
   }
 }

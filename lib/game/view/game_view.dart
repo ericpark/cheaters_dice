@@ -11,34 +11,21 @@ class GameViewMobile extends StatelessWidget {
     final playerOrder = context.read<GameBloc>().playerOrder;
 
     return Scaffold(
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.all(8),
-          child: FloatingActionButton(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            mini: true,
-            onPressed: () {
-              context.pop();
-            },
-            child: const Icon(Icons.close),
-          ),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
-        body: ColoredBox(
-          color: Colors.grey.shade200,
-          child: BlocBuilder<GameBloc, GameState>(
-            builder: (context, state) {
-              return SizedBox.expand(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      flex: 8,
-                      child: SizedBox.expand(
-                        child: Container(
-                          color: Colors.red,
+      body: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          ColoredBox(
+            color: Colors.grey.shade200,
+            child: BlocBuilder<GameBloc, GameState>(
+              builder: (context, state) {
+                return SizedBox.expand(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        flex: 10,
+                        child: SizedBox.expand(
                           child: Stack(
                             children: [
                               Center(
@@ -53,35 +40,54 @@ class GameViewMobile extends StatelessWidget {
                                       : [],
                                 ),
                               ),
-                              const Positioned(
-                                bottom: 25,
-                                right: 25,
+                              const Align(
+                                alignment: Alignment.bottomCenter,
                                 child: PlayerTurnInfo(),
                               ),
                             ],
                           ),
                         ),
                       ),
-                    ),
 
-                    Expanded(
-                      flex: 2,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: PlayerDice(
-                          hasRolled: state.hasRolled ?? false,
-                          dice: state.players[state.currentUserId]!.dice,
+                      Expanded(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: PlayerDice(
+                            hasRolled: state.hasRolled ?? false,
+                            dice: state.players[state.currentUserId]!.dice,
+                          ),
                         ),
                       ),
-                    ),
-                    //const Divider(height: 8, endIndent: 50, indent: 50),
-                    const Expanded(flex: 2, child: PlayerActions()),
-                  ],
-                ),
-              );
-            },
+                      //const Divider(height: 8, endIndent: 50, indent: 50),
+                      const Expanded(flex: 2, child: PlayerActions()),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
-        ));
+          Positioned(
+            top: 40,
+            left: 10,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: FloatingActionButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                mini: true,
+                onPressed: () {
+                  context.pop();
+                },
+                child: const Icon(Icons.close),
+              ),
+            ),
+          ),
+          const Positioned(
+              top: 40, right: 10, child: Card(child: PlayDirection())),
+        ],
+      ),
+    );
   }
 }
 

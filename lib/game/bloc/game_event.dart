@@ -38,7 +38,9 @@ class RoundStart extends GameEvent {
   final GameState game;
 }
 
-
+/// Rolled Dice
+///
+/// Marks completion of rolling dice animation.
 class RolledDice extends GameEvent {}
 
 /// Turn Start:

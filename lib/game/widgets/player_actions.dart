@@ -34,11 +34,102 @@ class PlayerActions extends StatelessWidget {
             isCurrentUser && bidsEqual && state.status == GameStatus.playing;
         //print('MAKING HERE');
 
-        return ColoredBox(
-          color: Colors.white,
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey.shade200),
+            borderRadius: BorderRadius.circular(15),
+          ),
           //margin: const EdgeInsets.all(8),
           child: Padding(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              //mainAxisSize: MainAxisSize.min,
+              children: [
+                const Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(5),
+                    child: SpecialModal(),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.red.shade300,
+                        side: BorderSide(
+                          color: canLiar ? Colors.red.shade300 : Colors.grey,
+                          width: 2,
+                        ),
+                      ),
+                      onPressed: canLiar
+                          ? () => context
+                              .read<GameBloc>()
+                              .add(const PlayerSubmitLiarGameEvent())
+                          : null,
+                      child: const Text('LIAR'),
+                    ),
+                  ),
+                ),
+                const Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(5),
+                    child: BidModal(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class PlayerActionsExpanded extends StatelessWidget {
+  const PlayerActionsExpanded({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<GameBloc, GameState>(
+      builder: (context, state) {
+        final currentUser = context.read<AuthCubit>().state.user?.id;
+        final isCurrentUser = (state.order.isNotEmpty
+                ? state.order[state.turn % state.order.length]
+                : '') ==
+            currentUser;
+
+        final bidsEqual = context
+                .read<GameBloc>()
+                .compareBids(state.currentBid, state.userBid!) ==
+            0;
+
+        final firstBid = state.currentBid.playerId == null;
+        final canBid =
+            ((isCurrentUser && !bidsEqual) || (isCurrentUser && firstBid)) &&
+                state.status == GameStatus.playing;
+        final canLiar = state.currentBid.playerId != currentUser &&
+            state.currentBid.playerId != null &&
+            state.status == GameStatus.playing;
+        final canSpotOn =
+            isCurrentUser && bidsEqual && state.status == GameStatus.playing;
+        //print('MAKING HERE');
+
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey.shade200),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          //margin: const EdgeInsets.all(8),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,

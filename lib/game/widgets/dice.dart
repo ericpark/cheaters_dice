@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 class Dice extends StatelessWidget {
   const Dice({
     required this.value,
-    this.length = 90,
+    this.size = 90,
     this.isDie = true,
     super.key,
   });
 
   final int value;
-  final double length;
+  final double size;
   final bool isDie;
 
   @override
@@ -19,8 +19,8 @@ class Dice extends StatelessWidget {
       return Padding(
         padding: EdgeInsets.zero,
         child: Container(
-          width: length,
-          height: length,
+          width: size,
+          height: size,
           decoration: BoxDecoration(
             border: Border.all(width: 2),
             borderRadius: BorderRadius.circular(15),
@@ -56,7 +56,7 @@ class Dice extends StatelessWidget {
     return Center(
       child: Icon(
         icon,
-        size: length + 2,
+        size: size + 2,
       ),
     );
   }

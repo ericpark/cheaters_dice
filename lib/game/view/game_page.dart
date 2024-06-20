@@ -20,13 +20,9 @@ class GamePage extends StatelessWidget {
                 .read<GameBloc>()
                 .add(GameLoad(userId: currentUserId, gameId: gameId));
 
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
+            return const GameLoading();
           case GameStatus.loading:
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
+            return const GameLoading();
           case GameStatus.playing:
             return const GameViewMobile();
           case GameStatus.transitioning:
@@ -37,6 +33,19 @@ class GamePage extends StatelessWidget {
             return const GameViewMobile();
         }
       },
+    );
+  }
+}
+
+class GameLoading extends StatelessWidget {
+  const GameLoading({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator()),
     );
   }
 }

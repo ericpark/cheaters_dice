@@ -1,10 +1,10 @@
 // ignore_for_file: require_trailing_commas
-
 import 'package:cheaters_dice/auth/auth.dart';
 import 'package:cheaters_dice/game/game.dart';
 import 'package:cheaters_dice/lobby/lobby.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:glass/glass.dart';
 import 'package:go_router/go_router.dart';
 
 class JoinedLobbyPage extends StatelessWidget {
@@ -114,22 +114,21 @@ class JoinedLobbyView extends StatelessWidget {
                 ),
                 if (state.joinedLobby!.status == LobbyStatus.loading)
                   Center(
-                    child: Container(
-                      color: Colors.black26.withOpacity(0.5),
-                      width: double.infinity,
-                      child: const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Starting game...',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          SizedBox(height: 10),
-                          CircularProgressIndicator(),
-                        ],
-                      ),
+                      child: const SizedBox(
+                    //color: Colors.black26.withOpacity(0.5),
+                    width: double.infinity,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Starting game...',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        SizedBox(height: 10),
+                        CircularProgressIndicator(),
+                      ],
                     ),
-                  ),
+                  ).asGlass()),
               ],
             );
           },

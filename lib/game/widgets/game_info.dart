@@ -1,4 +1,5 @@
 import 'package:cheaters_dice/game/game.dart';
+import 'package:cheaters_dice/game/widgets/play_direction.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -12,9 +13,6 @@ class GameInfo extends StatelessWidget {
         builder: (BuildContext context, BoxConstraints constraints) {
           return BlocBuilder<GameBloc, GameState>(
             builder: (context, state) {
-              final player = state.order.isNotEmpty
-                  ? state.order[state.turn % state.order.length]
-                  : 'waiting...';
               return Flex(
                 direction: Axis.vertical,
                 mainAxisSize: MainAxisSize.min,
@@ -26,20 +24,7 @@ class GameInfo extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Expanded(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                "$player's turn",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                        const SizedBox(height: 4),
                         if (state.currentBid != const Bid(number: 1, value: 1))
                           const FittedBox(
                             alignment: Alignment.bottomCenter,
@@ -60,7 +45,6 @@ class GameInfo extends StatelessWidget {
                                     value: state.currentBid.number,
                                     isDie: false,
                                   ),
-                                  const Text(' x '),
                                   Dice(value: state.currentBid.value),
                                 ],
                               ),

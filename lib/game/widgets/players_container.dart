@@ -97,6 +97,7 @@ class _PlayersContainerState extends State<PlayersContainer> {
       },
       builder: (context, state) {
         return SafeArea(
+          bottom: false,
           child: Stack(
             children: [
               PlayersLayout(

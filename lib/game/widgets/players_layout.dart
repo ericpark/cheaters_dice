@@ -23,12 +23,14 @@ class PlayersLayout extends StatefulWidget {
 
 class _PlayersLayoutState extends State<PlayersLayout> {
   List<Widget> calculateCircleCoordinates(
-      int numberOfPoints, double avatarSize) {
+    int numberOfPoints,
+    double avatarSize,
+  ) {
     final coordinates = <Widget>[];
 
-    const radius = 1.0; // adjust the radius as needed
+    const radius = 1.2; // adjust the radius as needed
     const centerX = 0.0; // adjust the center X coordinate as needed
-    const centerY = 0.0; // adjust the center Y coordinate as needed
+    const centerY = 0.2; // adjust the center Y coordinate as needed
     const startAngle = 3.14159 / 2; // start angle at 3/2 pi
 
     for (var i = 1; i < numberOfPoints; i++) {
@@ -56,8 +58,7 @@ class _PlayersLayoutState extends State<PlayersLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final numberOfPlayers = widget.players.length + 5;
-    const infoWidget = GameInfo();
+    final numberOfPlayers = widget.players.length + 1;
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -65,17 +66,17 @@ class _PlayersLayoutState extends State<PlayersLayout> {
           builder: (context, state) {
             final avatarSize = constraints.maxHeight > constraints.maxWidth
                 ? constraints.maxHeight * 0.3
-                : constraints.maxWidth * (1 / numberOfPlayers);
+                : constraints.maxWidth * 0.2;
 
             final avatars =
                 calculateCircleCoordinates(numberOfPlayers, avatarSize)
                   ..add(
                     Align(
-                      alignment: Alignment.bottomCenter,
+                      alignment: const Alignment(0, 0.2),
                       child: SizedBox(
-                        height: constraints.maxWidth * 0.3,
+                        height: constraints.maxHeight * 0.4,
                         width: constraints.maxWidth * 0.3,
-                        child: infoWidget,
+                        child: const GameInfo(),
                       ),
                     ),
                   );

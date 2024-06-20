@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 const ColorScheme _colorScheme = ColorScheme(
-  primary: Color.fromRGBO(0, 119, 238, 1),
-  primaryContainer: Color(0xFF3700B3),
+  primary: Color(0xFF0077EE),
+  primaryContainer: Color(0xFF0077EE),
   secondary: Color(0xFF03DAC6),
   secondaryContainer: Color(0xFF018786),
   surface: Color(0xFFFFFFFF),

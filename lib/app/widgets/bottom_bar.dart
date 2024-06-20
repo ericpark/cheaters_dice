@@ -14,8 +14,8 @@ class BottomBar extends StatelessWidget {
       style: TabStyle.react,
       items: const [
         TabItem(icon: Icons.home),
-        TabItem(icon: Icons.games),
-        TabItem(icon: Icons.assessment),
+        TabItem(icon: Icons.casino),
+        TabItem(icon: Icons.leaderboard),
       ],
       initialActiveIndex: initialActiveIndex,
       onTap: (int i) {
