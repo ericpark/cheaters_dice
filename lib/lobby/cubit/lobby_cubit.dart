@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:cheaters_dice/auth/auth.dart';
 import 'package:cheaters_dice/lobby/lobby.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -38,12 +39,14 @@ class LobbyCubit extends Cubit<LobbyState> {
     );
   }
 
-  Future<Lobby?> joinLobby(String lobbyId) async {
+  Future<Lobby?> joinLobby({
+    required String lobbyId,
+    required User user,
+  }) async {
     final joinedLobby = Lobby.fromJson(
       (await _lobbyRepository.getLobbyById(lobbyId: lobbyId))!.toJson(),
     );
     await _lobbyStream?.cancel();
-
     _lobbyStream = await _lobbyRepository.getLobbyStream(
       lobbyId: lobbyId,
       onData: (lobby) async {
@@ -60,14 +63,38 @@ class LobbyCubit extends Cubit<LobbyState> {
         }
       },
     );
+    await _lobbyRepository.joinLobbyWithPresence(
+      lobbyId: lobbyId,
+      userId: user.id,
+    );
+
     emit(
       state.copyWith(
         joinedLobbyId: lobbyId,
         joinedLobby: joinedLobby,
-        status: joinedLobby.status,
+        status: LobbyStatus.loading,
       ),
     );
     return joinedLobby;
+  }
+
+  Future<void> leaveLobby({
+    required User user,
+  }) async {
+    await _lobbyStream?.cancel();
+
+    await _lobbyRepository.leaveLobbyWithPresence(
+      userId: user.id,
+    );
+
+    emit(
+      state.copyWith(
+        joinedLobbyId: '',
+        joinedLobby: null,
+        status: LobbyStatus.loading,
+      ),
+    );
+    return;
   }
 
   Future<String> startGame(

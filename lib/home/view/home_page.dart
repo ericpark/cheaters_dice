@@ -32,6 +32,10 @@ class HomeView extends StatelessWidget {
             return SuperScaffold(
               transitionBetweenRoutes: false,
               appBar: SuperAppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.person),
+                  onPressed: () {},
+                ),
                 title: const Text('Home'),
                 largeTitle: SuperLargeTitle(
                   largeTitle: 'HOME',

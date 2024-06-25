@@ -111,23 +111,18 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         serverGameState.status == GameStatus.playing &&
         state.turn != 0 &&
         serverGameState.turn == 0) {
-      // Make transition
       add(
         ProcessTurnStart(
           game: serverGameState.copyWith(players: state.players),
         ),
       );
-      await Future<void>.delayed(const Duration(seconds: 2));
-
-      add(AnimationCompleted());
-      await Future<void>.delayed(const Duration(seconds: 2));
-      add(ProcessTurnStart(game: serverGameState));
-      await Future<void>.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 5));
+      await Future<void>.delayed(const Duration(seconds: 5));
 
       add(RoundStart(game: serverGameState));
-      await Future<void>.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 5));
 
-      add(AnimationCompleted());
+      // add(AnimationCompleted());
     } else if (state.status == GameStatus.playing &&
         serverGameState.status == GameStatus.playing) {
       // Make transition
@@ -136,6 +131,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     if (serverGameState.status == GameStatus.finished) {
       //await Future<void>.delayed(const Duration(seconds: 5));
+      add(ProcessTurnStart(game: serverGameState));
+      await Future<void>.delayed(const Duration(seconds: 2));
 
       emit(serverGameState.copyWith(status: GameStatus.finished));
     }
@@ -183,7 +180,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       event.game.copyWith(
         userBid: userBid,
         totalDice: totalDice,
-        status: GameStatus.transitioning,
+        status: GameStatus.playing,
         hasRolled: false,
       ),
     );
@@ -255,13 +252,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     //Do not emit if there's an error.
     if (!success) return;
 
-    emit(
+    /*emit(
       state.copyWith(
         currentBid: updatedBid,
         userBid: updatedBid,
         turn: state.turn + 1,
       ),
-    );
+    );*/
   }
 
   FutureOr<void> _onPlayerLiar(event, Emitter<GameState> emit) async {

@@ -175,6 +175,18 @@ Alternatively, run `flutter run` and code generation will take place automatical
 [very_good_analysis_link]: https://pub.dev/packages/very_good_analysis
 [very_good_cli_link]: https://github.com/VeryGoodOpenSource/very_good_cli
 
+
+## FlutterFire Configure
+
+To update the cloud functions used by this project:
+```sh
+dart pub global deactivate flutterfire_cli
+
+export PATH="$PATH":"$HOME/.pub-cache/bin"
+
+flutterfire configure
+```
+
 ## Updating Cloud Functions
 
 To update the cloud functions used by this project:

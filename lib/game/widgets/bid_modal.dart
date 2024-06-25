@@ -137,7 +137,7 @@ class BidModal extends StatelessWidget {
 }
 
 class _BidButtons extends StatelessWidget {
-  const _BidButtons({super.key});
+  const _BidButtons();
 
   @override
   Widget build(BuildContext context) {

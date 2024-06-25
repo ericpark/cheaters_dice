@@ -9,9 +9,10 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  cloud_firestore: ^4.15.6
+  cloud_firestore: ^5.0.1
   equatable: ^2.0.5
-  firebase_core: ^2.25.5
+  firebase_core: ^3.1.0
+  firebase_database: ^11.0.1
   firestore_converter: ^1.0.9
   flutter: 
    sdk: flutter

@@ -18,6 +18,10 @@ class GameViewMobile extends StatelessWidget {
             color: Colors.grey.shade200,
             child: BlocBuilder<GameBloc, GameState>(
               builder: (context, state) {
+                final activePlayerId =
+                    state.order[state.turn % state.order.length];
+
+                final activePlayer = state.players[activePlayerId];
                 return SizedBox.expand(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -30,8 +34,7 @@ class GameViewMobile extends StatelessWidget {
                             children: [
                               Center(
                                 child: PlayersContainer(
-                                  activePlayerId: state
-                                      .order[state.turn % state.order.length],
+                                  activePlayerId: activePlayerId,
                                   players: context
                                           .read<GameBloc>()
                                           .playerOrder
@@ -40,9 +43,9 @@ class GameViewMobile extends StatelessWidget {
                                       : [],
                                 ),
                               ),
-                              const Align(
+                              Align(
                                 alignment: Alignment.bottomCenter,
-                                child: PlayerTurnInfo(),
+                                child: PlayerTurnInfo(player: activePlayer),
                               ),
                             ],
                           ),
@@ -69,22 +72,22 @@ class GameViewMobile extends StatelessWidget {
           Positioned(
             top: 40,
             left: 10,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: FloatingActionButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                mini: true,
-                onPressed: () {
-                  context.pop();
-                },
-                child: const Icon(Icons.close),
+            child: FloatingActionButton(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
+              mini: true,
+              onPressed: () {
+                context.pop();
+              },
+              child: const Icon(Icons.close),
             ),
           ),
           const Positioned(
-              top: 40, right: 10, child: Card(child: PlayDirection())),
+            top: 40,
+            right: 10,
+            child: Card(child: PlayDirection()),
+          ),
         ],
       ),
     );

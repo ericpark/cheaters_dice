@@ -132,3 +132,5 @@ firebase.json
 **/venv/
 **/.venv/
 **/__pycache__/
+
+database.rules.json

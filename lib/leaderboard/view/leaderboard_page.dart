@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cheaters_dice/app/widgets/widgets.dart';
 import 'package:cheaters_dice/constants.dart';
-import 'package:cheaters_dice/game/game.dart';
 import 'package:flutter/material.dart';
 import 'package:super_cupertino_navigation_bar/super_cupertino_navigation_bar.dart';
 

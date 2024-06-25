@@ -1,4 +1,5 @@
 import 'package:cheaters_dice/app/widgets/widgets.dart';
+import 'package:cheaters_dice/auth/auth.dart';
 import 'package:cheaters_dice/lobby/lobby.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,9 +56,11 @@ class LobbyView extends StatelessWidget {
                     subtitle: Text('Players: ${lobby.players.keys.length}'),
                     trailing: ElevatedButton(
                       onPressed: () async {
-                        final joinedLobby = await context
-                            .read<LobbyCubit>()
-                            .joinLobby(lobby.id);
+                        final joinedLobby =
+                            await context.read<LobbyCubit>().joinLobby(
+                                  lobbyId: lobby.id,
+                                  user: context.read<AuthCubit>().state.user!,
+                                );
 
                         if (joinedLobby == null) return;
 

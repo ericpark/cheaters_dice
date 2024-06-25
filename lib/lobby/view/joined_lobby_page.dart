@@ -23,11 +23,24 @@ class JoinedLobbyPage extends StatelessWidget {
         title:
             Text(context.read<LobbyCubit>().state.joinedLobby?.name ?? 'Lobby'),
         leading: context.canPop()
-            ? null
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios),
+                onPressed: () async {
+                  context.pop('/lobby');
+
+                  await context
+                      .read<LobbyCubit>()
+                      .leaveLobby(user: context.read<AuthCubit>().state.user!);
+                },
+              )
             : IconButton(
                 icon: const Icon(Icons.arrow_back_ios),
-                onPressed: () {
+                onPressed: () async {
                   context.go('/lobby');
+
+                  await context
+                      .read<LobbyCubit>()
+                      .leaveLobby(user: context.read<AuthCubit>().state.user!);
                 },
               ),
         actions: userId == hostId
@@ -86,27 +99,29 @@ class JoinedLobbyView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       JoinedPlayers(
-                        players: players,
+                        players: state.joinedLobby!.players,
                         hostId: hostId,
                         height: constraints.maxHeight * 0.8,
                         width: constraints.maxWidth * 0.8,
                       ),
                       if (hostId == userId)
                         ElevatedButton(
-                          onPressed: () {
-                            context
-                                .read<LobbyCubit>()
-                                .startGame(
-                                  state.joinedLobbyId,
-                                  userId,
-                                  players,
-                                )
-                                .then((gameId) {
-                              context.read<GameBloc>().add(
-                                  GameStart(userId: userId, gameId: gameId));
-                              context.push('/game/$gameId');
-                            });
-                          },
+                          onPressed: players.length < 2
+                              ? null
+                              : () {
+                                  context
+                                      .read<LobbyCubit>()
+                                      .startGame(
+                                        state.joinedLobbyId,
+                                        userId,
+                                        players,
+                                      )
+                                      .then((gameId) {
+                                    context.read<GameBloc>().add(GameStart(
+                                        userId: userId, gameId: gameId));
+                                    context.push('/game/$gameId');
+                                  });
+                                },
                           child: const Text('Start Game'),
                         ),
                     ],
@@ -149,21 +164,24 @@ class JoinedPlayers extends StatelessWidget {
 
   final double height;
   final String hostId;
-  final List<String> players;
+  final Map<String, Player> players;
   final double width;
 
   @override
   Widget build(BuildContext context) {
+    print(players);
+    final playerKeys = players.keys.toList();
     return SizedBox(
       height: height,
       width: width,
       child: ListView.builder(
-        itemCount: players.length,
+        itemCount: players.keys.length,
         itemBuilder: (context, index) {
-          final player = players[index];
+          final player = players[playerKeys[index]];
+          final playerName = player?.name ?? player!.id;
           return ListTile(
-            title: Text(player),
-            leading: (player == hostId)
+            title: Text(playerName),
+            leading: (player!.id == hostId)
                 ? const Icon(
                     Icons.star,
                     color: Colors.yellow,

@@ -25,7 +25,9 @@ def create_game(req: https_fn.CallableRequest):
     try:
         # Generate a new game document id
         game_id = firestore.client().collection('games').document().id
-
+        
+        lobby_data = firestore.client().collection('lobbies').document(lobby_id).get().to_dict()
+        
         # Create a new game document in the 'games' collection
         game_data = {
             'id': game_id,
@@ -41,7 +43,7 @@ def create_game(req: https_fn.CallableRequest):
             'status': 'playing',
             'order': order,
             'table_order': req.data['players'],
-            'players': dict( (player, {'id': player, 'dice': [{'id': '{player}_{num}'.format(player=player, num=d), 'value': random.randint(1, 6)} for d in range(req.data['starting_dice'])]} ) for player in req.data['players']),
+            'players': dict( (player, {'id': player, 'photo': lobby_data['players'][player]['photo'], 'name': f"{lobby_data['players'][player]['first_name']} {lobby_data['players'][player]['last_name']}",  'dice': [{'id': '{player}_{num}'.format(player=player, num=d), 'value': random.randint(1, 6)} for d in range(req.data['starting_dice'])]} ) for player in req.data['players']),
             'total_dice': req.data['starting_dice'] * len(req.data['players']),
         }
         firestore.client().collection('games').document(game_id).set(game_data)

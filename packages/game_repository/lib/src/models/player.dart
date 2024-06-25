@@ -11,6 +11,7 @@ class Player with _$Player {
     String? name,
     @Default(0) int numberOfDice,
     @PlayerDiceConverter() @Default([]) List<Die> dice,
+    String? photo,
   }) = _Player;
 
   factory Player.fromJson(Map<String, dynamic> json) => _$PlayerFromJson(json);

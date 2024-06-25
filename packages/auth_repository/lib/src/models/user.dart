@@ -17,6 +17,8 @@ class User with _$User {
     String? email,
     @Default(true) bool? active,
     String? photo,
+    @Default(false) bool online,
+    @Default(0) int lastSeen, // in Epoch
   }) = _User;
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);

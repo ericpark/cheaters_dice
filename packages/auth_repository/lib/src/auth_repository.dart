@@ -3,14 +3,17 @@ import 'dart:async';
 import 'package:auth_repository/src/models/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as FBAuth;
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 
 class AuthRepository {
-  AuthRepository({FirebaseFirestore? firebaseDB})
+  AuthRepository({FirebaseFirestore? firebaseDB, FirebaseDatabase? realtimeDB})
       : _firebaseDB = firebaseDB ?? FirebaseFirestore.instance;
+  // _realtimeDB = realtimeDB ?? FirebaseDatabase.instance;
 
   // ignore: unused_field
   final FirebaseFirestore _firebaseDB;
+  //final FirebaseDatabase _realtimeDB;
 
   User get currentUser =>
       User.fromFirebaseUser(FBAuth.FirebaseAuth.instance.currentUser);

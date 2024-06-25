@@ -13,6 +13,8 @@ class User with _$User {
     //@Default([]) List<String> calendars,
     String? photo,
     @Default(true) bool? active,
+    @Default(false) bool online,
+    @Default(0) int lastSeen, // in Epoch
   }) = _User;
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
