@@ -66,14 +66,14 @@ class _PlayerAvatarState extends State<PlayerAvatar>
       builder: (BuildContext context, BoxConstraints constraints) {
         return BlocConsumer<GameBloc, GameState>(
           listener: (context, state) {
-            if (state.status == GameStatus.transitioning) {
+            if (state.status == GameStatus.revealing) {
               if (state.lastAction != null) {
                 final lastAction =
                     (state.lastAction!['type'] as String).toUpperCase();
 
                 if (lastAction == 'CHALLENGE') {
                   _playAnimation();
-                } else if (lastAction == 'SPOT ON') {
+                } else if (lastAction == 'SPOT') {
                   _playAnimation();
                 }
               }

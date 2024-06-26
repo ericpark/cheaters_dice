@@ -169,7 +169,6 @@ class JoinedPlayers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(players);
     final playerKeys = players.keys.toList();
     return SizedBox(
       height: height,

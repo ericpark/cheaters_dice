@@ -35,10 +35,13 @@ def update_game_from_action(event: firestore_fn.Event[firestore_fn.DocumentSnaps
     if last_action_data["action_type"] == "challenge":
         update_data = _handle_challenge_action(action_data=last_action_data, game_data=game_data, firestore_client=firestore_client)
         update_data["players"] = _rerollAllPlayersDice(players=update_data["players"])
+        #update_data["status"] = "revealing"
 
     if last_action_data["action_type"] == "spot":
         update_data = _handle_spot_on_action(action_data=last_action_data, game_data=game_data, firestore_client=firestore_client)
         update_data["players"] = _rerollAllPlayersDice(players=update_data["players"])
+        #update_data["status"] = "revealing"
+
 
     #TODO: Optional flag to shuffle between rounds?
     #shuffle_between_rounds = game_data.get("shuffle_between_rounds", False)

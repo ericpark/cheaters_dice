@@ -7,7 +7,15 @@ part 'generated/game.g.dart';
 part 'generated/game.firestore_converter.dart';
 part 'generated/game.freezed.dart';
 
-enum GameStatus { initial, loading, playing, transitioning, finished, failure }
+enum GameStatus {
+  initial,
+  loading,
+  playing,
+  transitioning,
+  revealing,
+  finished,
+  failure
+}
 
 @freezed
 @FirestoreConverter(defaultPath: 'games')

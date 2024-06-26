@@ -27,10 +27,12 @@ class GamePage extends StatelessWidget {
             return const GameViewMobile();
           case GameStatus.transitioning:
             return const GameViewMobile();
-          case GameStatus.failure:
-            return const Scaffold(body: Center(child: Text('ERROR')));
+          case GameStatus.revealing:
+            return const GameViewMobile();
           case GameStatus.finished:
             return const GameViewMobile();
+          case GameStatus.failure:
+            return const Scaffold(body: Center(child: Text('ERROR')));
         }
       },
     );

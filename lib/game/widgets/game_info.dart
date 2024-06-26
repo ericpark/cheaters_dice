@@ -18,7 +18,7 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
   final Duration _transitionDuration = const Duration(milliseconds: 2500);
 
   bool _showRoundResult = false;
-
+  String roundResultMessage = 'STARTING NEW ROUND';
   @override
   void initState() {
     super.initState();
@@ -58,7 +58,7 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _playEndRoundAnimation() async {
+  Future<void> _playEndRoundAnimation({bool finished = false}) async {
     try {
       // Show Challenge or Spot on
       setState(() {
@@ -82,7 +82,9 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
       // Show No Bids
       setState(() {
         _showRoundResult = !_showRoundResult;
-        _showFirstChild = !_showFirstChild;
+        if (!finished) {
+          _showFirstChild = !_showFirstChild;
+        }
       });
       await Future<void>.delayed(_transitionDuration);
     } on TickerCanceled {
@@ -103,21 +105,50 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
                       (state.lastAction!['type'] as String).toUpperCase();
 
                   setState(() {
-                    message = lastAction;
+                    if (lastAction == 'BID') {
+                      message = lastAction;
+                    }
                   });
                   if (lastAction == 'BID') {
                     _playAnimation();
-                  } else if (lastAction == 'CHALLENGE') {
-                    _playEndRoundAnimation();
-                  } else if (lastAction == 'SPOT ON') {
-                    _playEndRoundAnimation();
-                  } else {
-                    _playAnimation();
-                  }
+                  } else {}
+                }
+              }
+              if (state.status == GameStatus.revealing) {
+                if (state.lastAction != null) {
+                  final lastAction =
+                      (state.lastAction!['type'] as String).toUpperCase();
+
+                  setState(() {
+                    if (lastAction == 'CHALLENGE') {
+                      message = 'LIAR';
+                    } else if (lastAction == 'SPOT') {
+                      message = 'SPOT ON';
+                    } else {
+                      message = lastAction;
+                    }
+                  });
+                  _playEndRoundAnimation();
                 }
               }
               if (state.status == GameStatus.finished) {
-                if (state.lastAction != null) {}
+                if (state.lastAction != null) {
+                  final lastAction =
+                      (state.lastAction!['type'] as String).toUpperCase();
+
+                  setState(() {
+                    roundResultMessage = 'GAME OVER!';
+
+                    if (lastAction == 'CHALLENGE') {
+                      message = 'LIAR';
+                    } else if (lastAction == 'SPOT') {
+                      message = 'SPOT ON';
+                    } else {
+                      message = lastAction;
+                    }
+                  });
+                  _playEndRoundAnimation(finished: true);
+                }
               }
             },
             builder: (context, state) {
@@ -199,9 +230,9 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
                                       ),
                                     ),
                                   if (_showRoundResult)
-                                    const Padding(
-                                      padding: EdgeInsets.all(20),
-                                      child: Text('STARTING NEW ROUND'),
+                                    Padding(
+                                      padding: const EdgeInsets.all(20),
+                                      child: Text(roundResultMessage),
                                     ),
                                 ],
                               ),

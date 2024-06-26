@@ -79,6 +79,9 @@ class AnimationCompleted extends GameEvent {}
 
 class TurnCompleted extends GameEvent {}
 
-class RoundCompleted extends GameEvent {}
+class RoundCompleted extends GameEvent {
+  const RoundCompleted({required this.game});
+  final GameState game;
+}
 
 class GameCompleted extends GameEvent {}

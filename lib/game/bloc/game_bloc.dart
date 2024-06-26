@@ -34,6 +34,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<PlayerSubmitSpotOnGameEvent>(_onPlayerSpotOn);
     on<AnimationCompleted>(_onAnimationCompleted);
     on<TurnCompleted>(_onTurnComplete);
+    on<RoundCompleted>(_onRoundComplete);
+
     on<GameCompleted>(_onGameComplete);
   }
 
@@ -112,7 +114,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         state.turn != 0 &&
         serverGameState.turn == 0) {
       add(
-        ProcessTurnStart(
+        RoundCompleted(
           game: serverGameState.copyWith(players: state.players),
         ),
       );
@@ -157,6 +159,29 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         userBid: userBid,
         totalDice: totalDice,
         status: GameStatus.transitioning,
+      ),
+    );
+  }
+
+  FutureOr<void> _onRoundComplete(
+    RoundCompleted event,
+    Emitter<GameState> emit,
+  ) {
+    final players = event.game.tableOrder
+        .map((playerId) => event.game.players[playerId]!)
+        .toList();
+    final totalDice = players.fold<int>(
+      0,
+      (previousValue, player) => previousValue + player.dice.length,
+    );
+    final userBid = event.game.currentBid == Bid.initial()
+        ? Bid.minimum()
+        : event.game.currentBid;
+    emit(
+      event.game.copyWith(
+        userBid: userBid,
+        totalDice: totalDice,
+        status: GameStatus.revealing,
       ),
     );
   }

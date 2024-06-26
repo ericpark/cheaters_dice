@@ -5,6 +5,7 @@ enum GameStatus {
   loading,
   playing,
   transitioning,
+  revealing,
   finished,
   failure,
 }
