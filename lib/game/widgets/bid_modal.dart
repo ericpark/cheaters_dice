@@ -1,4 +1,5 @@
 import 'package:cheaters_dice/auth/auth.dart';
+import 'package:cheaters_dice/constants.dart';
 import 'package:cheaters_dice/game/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,9 +9,10 @@ class BidModal extends StatelessWidget {
   const BidModal({super.key});
 
   static const _pagePadding = 16.0;
-  static const _pageBreakpoint = 500.0;
-  static const _buttonHeight = 50.0;
+  static const _pageBreakpoint = AppConstants.modalBreakpoint;
+  static const _buttonHeight = AppConstants.buttonHeight;
   static const _bottomPaddingForButton = 66.0;
+
   @override
   Widget build(BuildContext context) {
     SliverWoltModalSheetPage bidPage(
@@ -100,7 +102,7 @@ class BidModal extends StatelessWidget {
               width: 2,
             ),
           ),
-          onPressed: isCurrentUser
+          onPressed: isCurrentUser && state.status == GameStatus.playing
               ? () {
                   WoltModalSheet.show<void>(
                     context: context,
@@ -122,10 +124,10 @@ class BidModal extends StatelessWidget {
                       debugPrint('Closed modal sheet with barrier tap');
                       Navigator.of(context).pop();
                     },
-                    maxDialogWidth: 560,
-                    minDialogWidth: 200,
-                    minPageHeight: 0,
-                    maxPageHeight: 0.9,
+                    maxDialogWidth: AppConstants.maxDialogWidth,
+                    minDialogWidth: AppConstants.minDialogWidth,
+                    minPageHeight: AppConstants.minPageHeight,
+                    maxPageHeight: AppConstants.maxPageHeight,
                   );
                 }
               : null,

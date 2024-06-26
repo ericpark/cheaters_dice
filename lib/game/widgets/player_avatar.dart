@@ -1,5 +1,6 @@
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cheaters_dice/constants.dart';
 import 'package:cheaters_dice/game/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,7 +22,8 @@ class PlayerAvatar extends StatefulWidget {
 class _PlayerAvatarState extends State<PlayerAvatar>
     with TickerProviderStateMixin {
   late AnimationController animation;
-  final Duration _transitionDuration = const Duration(milliseconds: 5000);
+  final Duration _transitionDuration =
+      const Duration(milliseconds: AppConstants.diceTransitionDuration);
   bool _shouldReveal = false;
 
   @override
@@ -68,14 +70,15 @@ class _PlayerAvatarState extends State<PlayerAvatar>
           listener: (context, state) {
             if (state.status == GameStatus.revealing) {
               if (state.lastAction != null) {
-                final lastAction =
+                /*final lastAction =
                     (state.lastAction!['type'] as String).toUpperCase();
 
                 if (lastAction == 'CHALLENGE') {
                   _playAnimation();
                 } else if (lastAction == 'SPOT') {
                   _playAnimation();
-                }
+                }*/
+                _playAnimation();
               }
             }
           },
@@ -99,6 +102,7 @@ class _PlayerAvatarState extends State<PlayerAvatar>
                               BorderRadius.circular(constraints.maxHeight),
                         ),
                         child: CircleAvatar(
+                          backgroundColor: Colors.white,
                           maxRadius: constraints.maxWidth * 0.45,
                           child: ClipOval(
                             child: CachedNetworkImage(
@@ -116,40 +120,15 @@ class _PlayerAvatarState extends State<PlayerAvatar>
                   AnimatedSwitcherPlus.translationTop(
                     duration: _transitionDuration,
                     child: !_shouldReveal
-                        ? Row(
-                            key: const ValueKey('0'),
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              widget.player.dice.length,
-                              (index) => Container(
-                                width: constraints.maxHeight * 0.1,
-                                height: constraints.maxHeight * 0.1,
-                                decoration: BoxDecoration(
-                                  border: Border.all(),
-                                  borderRadius: BorderRadius.circular(
-                                    constraints.maxHeight * 0.02,
-                                  ),
-                                ),
-                                margin: const EdgeInsets.all(4),
-                              ),
-                            ),
-                          )
-                        : Row(
+                        ? _EmptyPlayerDice(
                             key: const ValueKey('1'),
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              widget.player.dice.length,
-                              (index) => Container(
-                                margin: const EdgeInsets.all(4),
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Dice(
-                                    size: constraints.maxHeight * 0.1,
-                                    value: widget.player.dice[index].value,
-                                  ),
-                                ),
-                              ),
-                            ),
+                            widget: widget,
+                            constraints: constraints,
+                          )
+                        : _RevealedPlayerDice(
+                            key: const ValueKey('1'),
+                            widget: widget,
+                            constraints: constraints,
                           ),
                   ),
                 ],
@@ -158,6 +137,77 @@ class _PlayerAvatarState extends State<PlayerAvatar>
           },
         );
       },
+    );
+  }
+}
+
+class _RevealedPlayerDice extends StatelessWidget {
+  const _RevealedPlayerDice({
+    required this.widget,
+    required this.constraints,
+    super.key,
+  });
+
+  final PlayerAvatar widget;
+  final BoxConstraints constraints;
+
+  @override
+  Widget build(BuildContext context) {
+    final previousBid = context.read<GameBloc>().state.lastBid;
+
+    return Row(
+      key: key,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(
+        widget.player.dice.length,
+        (index) => Container(
+          margin: const EdgeInsets.all(4),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Dice(
+              key: ValueKey(widget.player.dice[index].id),
+              size: constraints.maxHeight * 0.1,
+              value: widget.player.dice[index].value,
+              highlight: previousBid != null &&
+                  (widget.player.dice[index].value == previousBid.value ||
+                      widget.player.dice[index].value == 1),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyPlayerDice extends StatelessWidget {
+  const _EmptyPlayerDice({
+    required this.widget,
+    required this.constraints,
+    super.key,
+  });
+
+  final PlayerAvatar widget;
+  final BoxConstraints constraints;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      key: key,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(
+        widget.player.dice.length,
+        (index) => Container(
+          width: constraints.maxHeight * 0.1,
+          height: constraints.maxHeight * 0.1,
+          decoration: BoxDecoration(
+            border: Border.all(),
+            borderRadius: BorderRadius.circular(
+              constraints.maxHeight * 0.02,
+            ),
+          ),
+          margin: const EdgeInsets.all(4),
+        ),
+      ),
     );
   }
 }

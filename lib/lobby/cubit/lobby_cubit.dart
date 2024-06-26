@@ -102,6 +102,7 @@ class LobbyCubit extends Cubit<LobbyState> {
     String hostId,
     List<String> players,
   ) async {
+    // Updates the lobby status to loading so all players know it's starting
     await _lobbyRepository
         .updateLobbyById(lobbyId: lobbyId, data: {'status': 'loading'});
     final callable = FirebaseFunctions.instance.httpsCallable(

@@ -9,9 +9,10 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 class SpecialModal extends StatelessWidget {
   const SpecialModal({super.key});
 
-  static const _pagePadding = 5.0;
-  static const _pageBreakpoint = 500.0;
-  static const _buttonHeight = 50.0;
+  static const _pagePadding = AppConstants.pagePadding;
+  static const _pageBreakpoint = AppConstants.modalBreakpoint;
+  static const _buttonHeight = AppConstants.buttonHeight;
+
   static final buttonCarouselController = CarouselController();
 
   void onPressed(BuildContext context) {
@@ -152,10 +153,10 @@ class SpecialModal extends StatelessWidget {
                       debugPrint('Closed modal sheet with barrier tap');
                       Navigator.of(context).pop();
                     },
-                    maxDialogWidth: 560,
-                    minDialogWidth: 200,
-                    minPageHeight: 0,
-                    maxPageHeight: 0.9,
+                    maxDialogWidth: AppConstants.maxDialogWidth,
+                    minDialogWidth: AppConstants.minDialogWidth,
+                    minPageHeight: AppConstants.minPageHeight,
+                    maxPageHeight: AppConstants.maxPageHeight,
                   );
                 },
           child: const Text('SPECIAL'),

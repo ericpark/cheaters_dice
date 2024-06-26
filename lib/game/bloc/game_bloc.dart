@@ -1,4 +1,4 @@
-// ignore_for_file: flutter_style_todos
+// ignore_for_file: flutter_style_todos, comment_references
 
 import 'dart:async';
 
@@ -21,18 +21,18 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       : _gameRepository = gameRepository,
         super(GameState.initial()) {
     //on<GameEvent>(_onGameEvent);
-    on<GameStart>(_onGameStart);
-    on<GameLoad>(_onGameLoad);
-    on<GameStateUpdate>(_onGameUpdate);
-    on<RoundStart>(_onRoundStart);
-    on<RolledDice>(_onRolledDice);
-    on<ProcessTurnStart>(_onProcessTurnStart);
-    on<PlayerActionGameEvent>(_onPlayerAction);
+    on<GameCreated>(_onGameCreated);
+    on<GameLoaded>(_onGameLoaded);
+    on<GameStateUpdated>(_onGameUpdated);
+    on<RoundStarted>(_onRoundStarted);
+    on<DiceRollCompleted>(_onRolledDice);
+    on<TurnProcessingStarted>(_onTurnProcessingStarted);
+    //on<PlayerActionGameEvent>(_onPlayerAction);
     on<PlayerUpdateUserBidGameEvent>(_onPlayerUpdateBid);
     on<PlayerSubmitBidGameEvent>(_onPlayerSubmitBid);
     on<PlayerSubmitLiarGameEvent>(_onPlayerLiar);
     on<PlayerSubmitSpotOnGameEvent>(_onPlayerSpotOn);
-    on<AnimationCompleted>(_onAnimationCompleted);
+    on<RoundAnimationsCompleted>(_onRoundAnimationsCompleted);
     on<TurnCompleted>(_onTurnComplete);
     on<RoundCompleted>(_onRoundComplete);
 
@@ -44,163 +44,138 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   StreamSubscription<DocumentSnapshot<Game>>? _gameStream;
 
   void init(String userId, String gameId) {
-    add(GameStart(userId: userId, gameId: gameId));
+    add(GameCreated(userId: userId, gameId: gameId));
     //add(RoundStart());
   }
 
-  FutureOr<void> _onGameStart(GameStart event, Emitter<GameState> emit) async {
-    debugPrint('Game Start: ${event.gameId}');
-    // Close any existing game streams
-    await _gameStream?.cancel();
-
-    // Initialize a new game with the host as first player.
-    emit(
-      GameState.initial()
-          .copyWith(id: event.gameId, currentUserId: event.userId),
-    );
-
-    _gameStream = await _gameRepository.getGameStream(
-      gameId: event.gameId,
-      onData: (Game? game) {
-        add(GameStateUpdate(game: game));
-      },
-    );
-
-    // Wait for the game to load
-    emit(state.copyWith(status: GameStatus.loading));
-  }
-
-  /// Load Games for other players besides the host.
-  FutureOr<void> _onGameLoad(GameLoad event, Emitter<GameState> emit) async {
-    debugPrint('Game Load: ${event.gameId}');
-    // Close any existing game streams
-    await _gameStream?.cancel();
-
-    emit(
-      GameState.initial()
-          .copyWith(id: event.gameId, currentUserId: event.userId),
-    );
-
-    _gameStream = await _gameRepository.getGameStream(
-      gameId: event.gameId,
-      onData: (Game? game) {
-        add(GameStateUpdate(game: game));
-      },
-    );
-
-    // Wait for the game to load
-    emit(state.copyWith(status: GameStatus.loading));
-  }
-
-  FutureOr<void> _onGameUpdate(
-    GameStateUpdate event,
+  /// Used when creating the game by the host.
+  FutureOr<void> _onGameCreated(
+    GameCreated event,
     Emitter<GameState> emit,
   ) async {
+    debugPrint('Game Created: ${event.gameId}');
+    // Close any existing game streams
+    await _gameStream?.cancel();
+
+    //Initialize an empty Game with the current user and game Id
+    emit(
+      GameState.initial().copyWith(
+        id: event.gameId,
+        currentUserId: event.userId,
+      ),
+    );
+
+    _gameStream = await _gameRepository.getGameStream(
+      gameId: event.gameId,
+      onData: (Game? game) {
+        add(GameStateUpdated(game: game));
+      },
+    );
+
+    // Wait for the game to load - this will be updated when the stream updates.
+    emit(state.copyWith(status: GameStatus.loading));
+  }
+
+  /// Used when creating loading the game by the players
+  FutureOr<void> _onGameLoaded(
+    GameLoaded event,
+    Emitter<GameState> emit,
+  ) async {
+    debugPrint('Game Loaded: ${event.gameId}');
+    // Close any existing game streams
+    await _gameStream?.cancel();
+
+    //Initialize an empty Game with the current user and game Id
+    _gameStream = await _gameRepository.getGameStream(
+      gameId: event.gameId,
+      onData: (Game? game) {
+        add(GameStateUpdated(game: game));
+      },
+    );
+
+    // Wait for the game to load - this will be updated when the stream updates.
+    emit(
+      GameState.initial().copyWith(
+        id: event.gameId,
+        currentUserId: event.userId,
+        status: GameStatus.loading,
+      ),
+    );
+  }
+
+  FutureOr<void> _onGameUpdated(
+    GameStateUpdated event,
+    Emitter<GameState> emit,
+  ) async {
+    // Check if game is valid.
     if (event.game == null) return null;
 
+    // Convert server game model to GameState and combine current GameState
+    // values. copy over the currentUserId and hasRolled is copied over
+    // so the user does not need to roll every turn.
     final serverGameState =
         GameState.fromJson(event.game?.toJson() ?? {}).copyWith(
       currentUserId: state.currentUserId,
       hasRolled: state.hasRolled,
     );
 
-    // Initial Loading - should only be used once.
+    // Loading State when game is created or loaded
     if (state.status == GameStatus.loading) {
-      add(RoundStart(game: serverGameState));
-      add(AnimationCompleted());
-    }
-    if (state.status == GameStatus.playing &&
+      debugPrint('Game Loading Started');
+      add(RoundStarted(game: serverGameState));
+      // Might be necessary for the listener to pick up.
+      //add(AnimationCompleted());
+    } else if (state.status == GameStatus.playing &&
         serverGameState.status == GameStatus.playing &&
         state.turn != 0 &&
         serverGameState.turn == 0) {
+      debugPrint('Game Round Completed: ${state.round}');
+
+      // Prepare and trigger animations for the round completion.
       add(
         RoundCompleted(
           game: serverGameState.copyWith(players: state.players),
+          nextState: serverGameState,
         ),
       );
+
       await Future<void>.delayed(const Duration(seconds: 5));
       await Future<void>.delayed(const Duration(seconds: 5));
 
-      add(RoundStart(game: serverGameState));
+      // Prepare for next round.
+      add(RoundStarted(game: serverGameState));
       await Future<void>.delayed(const Duration(seconds: 5));
 
       // add(AnimationCompleted());
-    } else if (state.status == GameStatus.playing &&
+    }
+    // Normal Turn ended
+    else if (state.status == GameStatus.playing &&
         serverGameState.status == GameStatus.playing) {
-      // Make transition
-      add(ProcessTurnStart(game: serverGameState));
+      add(TurnProcessingStarted(game: serverGameState));
     }
 
     if (serverGameState.status == GameStatus.finished) {
       //await Future<void>.delayed(const Duration(seconds: 5));
-      add(ProcessTurnStart(game: serverGameState));
+      add(TurnProcessingStarted(game: serverGameState));
       await Future<void>.delayed(const Duration(seconds: 2));
 
       emit(serverGameState.copyWith(status: GameStatus.finished));
     }
   }
 
-  FutureOr<void> _onProcessTurnStart(
-    ProcessTurnStart event,
-    Emitter<GameState> emit,
-  ) {
-    final players = event.game.tableOrder
-        .map((playerId) => event.game.players[playerId]!)
-        .toList();
-    final totalDice = players.fold<int>(
-      0,
-      (previousValue, player) => previousValue + player.dice.length,
-    );
-    final userBid = event.game.currentBid == Bid.initial()
-        ? Bid.minimum()
-        : event.game.currentBid;
-    emit(
-      event.game.copyWith(
-        userBid: userBid,
-        totalDice: totalDice,
-        status: GameStatus.transitioning,
-      ),
-    );
-  }
-
-  FutureOr<void> _onRoundComplete(
-    RoundCompleted event,
-    Emitter<GameState> emit,
-  ) {
-    final players = event.game.tableOrder
-        .map((playerId) => event.game.players[playerId]!)
-        .toList();
-    final totalDice = players.fold<int>(
-      0,
-      (previousValue, player) => previousValue + player.dice.length,
-    );
-    final userBid = event.game.currentBid == Bid.initial()
-        ? Bid.minimum()
-        : event.game.currentBid;
-    emit(
-      event.game.copyWith(
-        userBid: userBid,
-        totalDice: totalDice,
-        status: GameStatus.revealing,
-      ),
-    );
-  }
-
-  FutureOr<void> _onRoundStart(
-    RoundStart event,
+  FutureOr<void> _onRoundStarted(
+    RoundStarted event,
     Emitter<GameState> emit,
   ) async {
-    final players = event.game.tableOrder
-        .map((playerId) => event.game.players[playerId]!)
-        .toList();
-    final totalDice = players.fold<int>(
-      0,
-      (previousValue, player) => previousValue + player.dice.length,
-    );
+    // Calculate the total dice
+    final totalDice = calculateTotalDice(game: event.game);
+
+    // Set the userBid to the currentBid if it's the first turn
     final userBid = event.game.currentBid == Bid.initial()
         ? Bid.minimum()
         : event.game.currentBid;
 
+    // Changing the status to playing allows players to access the game.
     emit(
       event.game.copyWith(
         userBid: userBid,
@@ -211,9 +186,100 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
-  FutureOr<void> _onPlayerAction(event, Emitter<GameState> emit) {
+  /// Sets the game state to revealing to prevent users from interacting
+  /// during the animations. [status] set to [GameStatus.revealing]
+  /// triggers animations. Once animations are done, the round animations
+  /// complete event is added.
+  FutureOr<void> _onRoundComplete(
+    RoundCompleted event,
+    Emitter<GameState> emit,
+  ) {
+    // Calculate the total dice
+    final totalDice = calculateTotalDice(game: event.game);
+
+    // Set the userBid to the currentBid if it's the first turn
+    final userBid = event.game.currentBid == Bid.initial()
+        ? Bid.minimum()
+        : event.game.currentBid;
+    // Set the lastBid to the current state's currentBid for comparison purposes
+    final lastBid = state.currentBid;
+
+    final String? actionResult;
+    if (event.game.lastAction?['type'] == 'challenge') {
+      final challengerId = event.game.lastAction!['player_id'] as String;
+      if (event.game.players[challengerId]!.dice.length >
+          event.nextState.players[challengerId]!.dice.length) {
+        actionResult = '${event.game.players[challengerId]!.name} LOSES 1 DICE';
+        // Challenger loses dice
+      } else {
+        actionResult = '${event.game.players[challengerId]!.name} IS CORRECT';
+      }
+    } else if (event.game.lastAction?['type'] == 'spot') {
+      final challengerId = event.game.lastAction!['player_id'] as String;
+
+      if (event.game.players[challengerId]!.dice.length >
+          event.nextState.players[challengerId]!.dice.length) {
+        // Challenger loses dice
+        actionResult = '${event.game.players[challengerId]!.name} LOSES 2 DICE';
+      } else {
+        actionResult = 'EVERYONE LOSES 1 DIE';
+      }
+    } else {
+      actionResult = null;
+    }
+    emit(
+      event.game.copyWith(
+        lastBid: lastBid,
+        userBid: userBid,
+        totalDice: totalDice,
+        actionResult: actionResult,
+        status: GameStatus.revealing,
+      ),
+    );
+  }
+
+  /// Sets the game state to transitioning to prevent users from interacting
+  /// during the animations. [status] set to [GameStatus.transitioning]
+  /// triggers animations. Once animations are done, the turn complete event is
+  /// added.
+  FutureOr<void> _onTurnProcessingStarted(
+    TurnProcessingStarted event,
+    Emitter<GameState> emit,
+  ) {
+    debugPrint('Turn Processing Started (BID, ..TBD)');
+    // Calculate the total dice
+    final totalDice = calculateTotalDice(game: event.game);
+
+    final userBid = event.game.currentBid == Bid.initial()
+        ? Bid.minimum()
+        : event.game.currentBid;
+
+    emit(
+      event.game.copyWith(
+        userBid: userBid,
+        totalDice: totalDice,
+        status: GameStatus.transitioning,
+      ),
+    );
+  }
+
+  /// Event is added when the animations are completed and the game is ready
+  /// This will allow users to interact with actions again.
+  FutureOr<void> _onTurnComplete(event, Emitter<GameState> emit) async {
+    debugPrint('Turn Animations Complete');
+    emit(state.copyWith(status: GameStatus.playing, lastAction: null));
+  }
+
+  FutureOr<void> _onRoundAnimationsCompleted(
+    event,
+    Emitter<GameState> emit,
+  ) async {
     emit(state.copyWith(status: GameStatus.playing));
   }
+  /*
+  FutureOr<void> _onPlayerAction(event, Emitter<GameState> emit) {
+    emit(state.copyWith(status: GameStatus.playing));
+  }*/
 
   FutureOr<void> _onPlayerUpdateBid(
     PlayerUpdateUserBidGameEvent event,
@@ -326,14 +392,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );*/
   }
 
-  FutureOr<void> _onTurnComplete(event, Emitter<GameState> emit) async {
-    emit(state.copyWith(status: GameStatus.playing, lastAction: null));
-  }
-
-  FutureOr<void> _onAnimationCompleted(event, Emitter<GameState> emit) async {
-    emit(state.copyWith(status: GameStatus.playing));
-  }
-
   /// Reset the game state to initial before going back to lobby
   FutureOr<void> _onGameComplete(event, Emitter<GameState> emit) async {
     emit(GameState.initial());
@@ -408,6 +466,18 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final players = order.map((playerId) => state.players[playerId]!).toList();
 
     return players;
+  }
+
+  int calculateTotalDice({required GameState game}) {
+    // Put players in a List in tableOrder
+    final players =
+        game.tableOrder.map((playerId) => game.players[playerId]!).toList();
+
+    // Calculate the total dice
+    final totalDice =
+        players.fold<int>(0, (prev, player) => prev + player.dice.length);
+
+    return totalDice;
   }
 
   FutureOr<void> _onRolledDice(event, Emitter<GameState> emit) async {

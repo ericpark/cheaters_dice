@@ -18,7 +18,7 @@ class GamePage extends StatelessWidget {
           case GameStatus.initial:
             context
                 .read<GameBloc>()
-                .add(GameLoad(userId: currentUserId, gameId: gameId));
+                .add(GameLoaded(userId: currentUserId, gameId: gameId));
 
             return const GameLoading();
           case GameStatus.loading:

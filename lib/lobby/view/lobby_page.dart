@@ -23,6 +23,8 @@ class LobbyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = context.read<AuthCubit>().state.user!;
+
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return BlocBuilder<LobbyCubit, LobbyState>(
@@ -30,7 +32,7 @@ class LobbyView extends StatelessWidget {
             return SuperScaffold(
               transitionBetweenRoutes: false,
               appBar: SuperAppBar(
-                title: const Text('Lobbies'),
+                title: const Text('LOBBIES'),
                 largeTitle: SuperLargeTitle(
                   largeTitle: 'LOBBIES',
                   actions: [
@@ -51,25 +53,28 @@ class LobbyView extends StatelessWidget {
                 itemCount: state.availableLobbies.length,
                 itemBuilder: (context, index) {
                   final lobby = state.availableLobbies[index];
+
                   return ListTile(
                     title: Text(lobby.name),
-                    subtitle: Text('Players: ${lobby.players.keys.length}'),
+                    subtitle: Text('STATUS: ${lobby.status.name}'),
                     trailing: ElevatedButton(
                       onPressed: () async {
                         final joinedLobby =
                             await context.read<LobbyCubit>().joinLobby(
                                   lobbyId: lobby.id,
-                                  user: context.read<AuthCubit>().state.user!,
+                                  user: currentUser,
                                 );
 
                         if (joinedLobby == null) return;
 
                         if (joinedLobby.gameId != null &&
                             joinedLobby.status == LobbyStatus.playing) {
-                          // ignore: use_build_context_synchronously
+                          // If game has started, just jump into the game.
+                          if (!context.mounted) return;
                           await context.push('/game/${joinedLobby.gameId}');
                         } else {
-                          // ignore: use_build_context_synchronously
+                          // No game in progress, just continue to lobby.
+                          if (!context.mounted) return;
                           await context.push('/lobby/${lobby.id}');
                         }
                       },

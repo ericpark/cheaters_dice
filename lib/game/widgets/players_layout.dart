@@ -74,8 +74,8 @@ class _PlayersLayoutState extends State<PlayersLayout> {
                     Align(
                       alignment: const Alignment(0, 0.2),
                       child: SizedBox(
-                        height: constraints.maxHeight * 0.4,
-                        width: constraints.maxWidth * 0.3,
+                        height: avatarSize * 0.8,
+                        width: avatarSize * 0.8,
                         child: const GameInfo(),
                       ),
                     ),

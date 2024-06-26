@@ -83,7 +83,7 @@ class JoinedLobbyView extends StatelessWidget {
         return BlocConsumer<LobbyCubit, LobbyState>(
           listener: (context, state) {
             if (state.joinedLobby!.status == LobbyStatus.playing) {
-              context.read<GameBloc>().add(GameStart(
+              context.read<GameBloc>().add(GameLoaded(
                   userId: userId, gameId: state.joinedLobby!.gameId!));
               context.push('/game/${state.joinedLobby!.gameId}');
             }
@@ -91,7 +91,7 @@ class JoinedLobbyView extends StatelessWidget {
           builder: (context, state) {
             final hostId = state.joinedLobby!.hostId ?? userId;
             final players = state.joinedLobby!.players.keys.toList();
-
+            final canStartGame = players.length > 1;
             return Stack(
               children: [
                 Center(
@@ -106,9 +106,8 @@ class JoinedLobbyView extends StatelessWidget {
                       ),
                       if (hostId == userId)
                         ElevatedButton(
-                          onPressed: players.length < 2
-                              ? null
-                              : () {
+                          onPressed: canStartGame
+                              ? () {
                                   context
                                       .read<LobbyCubit>()
                                       .startGame(
@@ -117,11 +116,13 @@ class JoinedLobbyView extends StatelessWidget {
                                         players,
                                       )
                                       .then((gameId) {
-                                    context.read<GameBloc>().add(GameStart(
+                                    // Notify the GameBloc that the game created
+                                    context.read<GameBloc>().add(GameCreated(
                                         userId: userId, gameId: gameId));
                                     context.push('/game/$gameId');
                                   });
-                                },
+                                }
+                              : null,
                           child: const Text('Start Game'),
                         ),
                     ],
@@ -129,21 +130,21 @@ class JoinedLobbyView extends StatelessWidget {
                 ),
                 if (state.joinedLobby!.status == LobbyStatus.loading)
                   Center(
-                      child: const SizedBox(
-                    //color: Colors.black26.withOpacity(0.5),
-                    width: double.infinity,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Starting game...',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                        SizedBox(height: 10),
-                        CircularProgressIndicator(),
-                      ],
-                    ),
-                  ).asGlass()),
+                    child: const SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Starting game...',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          SizedBox(height: 10),
+                          CircularProgressIndicator(),
+                        ],
+                      ),
+                    ).asGlass(),
+                  ),
               ],
             );
           },

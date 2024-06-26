@@ -6,34 +6,17 @@ class Dice extends StatelessWidget {
     required this.value,
     this.size = 90,
     this.isDie = true,
+    this.highlight = false,
     super.key,
   });
 
   final int value;
   final double size;
   final bool isDie;
+  final bool highlight;
 
   @override
   Widget build(BuildContext context) {
-    if (!isDie) {
-      return Padding(
-        padding: EdgeInsets.zero,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            border: Border.all(width: 2),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Center(
-            child: Text(
-              '$value',
-              style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
-      );
-    }
     var icon = DiceIcons.dice0;
 
     switch (value) {
@@ -53,10 +36,33 @@ class Dice extends StatelessWidget {
         icon = DiceIcons.dice0;
     }
 
-    return Center(
-      child: Icon(
-        icon,
-        size: size + 2,
+    return Padding(
+      padding: EdgeInsets.zero,
+      child: Container(
+        // This is done so the boxes line up when side by side. The die needs to
+        // a bit bigger vs the standard number
+        width: size + (!isDie ? 0 : 2),
+        height: size + (!isDie ? 0 : 2),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(size / 6.28),
+          border: !isDie ? Border.all(width: 3) : null,
+          color: highlight ? Theme.of(context).primaryColor : null,
+        ),
+        child: Center(
+          child: !isDie
+              ? Text(
+                  '$value',
+                  style: const TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              : Icon(
+                  icon,
+                  size: size + 2,
+                  color: highlight ? Colors.white : Colors.black,
+                ),
+        ),
       ),
     );
   }

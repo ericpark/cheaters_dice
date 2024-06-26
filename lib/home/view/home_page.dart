@@ -36,6 +36,10 @@ class HomeView extends StatelessWidget {
                   icon: const Icon(Icons.person),
                   onPressed: () {},
                 ),
+                actions: IconButton(
+                  icon: const Icon(Icons.notifications_none_sharp),
+                  onPressed: () {},
+                ),
                 title: const Text('Home'),
                 largeTitle: SuperLargeTitle(
                   largeTitle: 'HOME',

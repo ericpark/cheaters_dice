@@ -1,4 +1,5 @@
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
+import 'package:cheaters_dice/constants.dart';
 import 'package:cheaters_dice/game/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,14 +12,18 @@ class GameInfo extends StatefulWidget {
 }
 
 class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
-  String message = '-';
   Widget animationWidget = Container();
   late AnimationController animation;
-  bool _showFirstChild = true;
-  final Duration _transitionDuration = const Duration(milliseconds: 2500);
-
+  final Duration _transitionDuration =
+      const Duration(milliseconds: AppConstants.gameInfoTransitionDuration);
+  final Duration _diceTransitionDuration =
+      const Duration(milliseconds: AppConstants.diceTransitionDuration);
+  bool _showGameInfo = true;
   bool _showRoundResult = false;
-  String roundResultMessage = 'STARTING NEW ROUND';
+  String message = '-';
+  String newRoundMessage = 'NEW ROUND';
+  String roundResultsMessage = '';
+
   @override
   void initState() {
     super.initState();
@@ -35,19 +40,19 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void runAnimation(String? message) {
-    _playAnimation();
-  }
-
-  Future<void> _playAnimation({bool shouldEndTurn = true}) async {
+  Future<void> _playEndTurnAnimation({bool shouldEndTurn = true}) async {
     try {
+      // Show Challenge or Spot on
       setState(() {
-        _showFirstChild = !_showFirstChild;
+        _showGameInfo = !_showGameInfo;
       });
       await Future<void>.delayed(_transitionDuration);
+
+      // Show Current Bid
       setState(() {
-        _showFirstChild = !_showFirstChild;
+        _showGameInfo = !_showGameInfo;
       });
+
       await Future<void>.delayed(_transitionDuration).then(
         (_) => shouldEndTurn
             ? context.read<GameBloc>().add(TurnCompleted())
@@ -62,28 +67,36 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
     try {
       // Show Challenge or Spot on
       setState(() {
-        _showFirstChild = !_showFirstChild;
+        _showGameInfo = !_showGameInfo;
       });
       await Future<void>.delayed(_transitionDuration);
+
+      // Set result information and transition to it
       setState(() {
-        _showFirstChild = !_showFirstChild;
+        _showGameInfo = !_showGameInfo;
         _showRoundResult = !_showRoundResult;
       });
-      // Show Dice
       await Future<void>.delayed(_transitionDuration);
-      await Future<void>.delayed(_transitionDuration);
-      setState(() {
-        _showFirstChild = !_showFirstChild;
-      });
+
+      // Show Dice animations in Player Avatars
+      // This could be done by triggering the dice animation with a custom state
+      // but that seems unnecessary for now.
+      await Future<void>.delayed(_diceTransitionDuration);
+
       // Show Result
+      setState(() {
+        _showGameInfo = !_showGameInfo;
+      });
       await Future<void>.delayed(_transitionDuration);
-      await Future<void>.delayed(_transitionDuration);
+
+      // Hide the dice so the future values are not shared.
+      await Future<void>.delayed(_diceTransitionDuration);
 
       // Show No Bids
       setState(() {
         _showRoundResult = !_showRoundResult;
         if (!finished) {
-          _showFirstChild = !_showFirstChild;
+          _showGameInfo = !_showGameInfo;
         }
       });
       await Future<void>.delayed(_transitionDuration);
@@ -110,7 +123,7 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
                     }
                   });
                   if (lastAction == 'BID') {
-                    _playAnimation();
+                    _playEndTurnAnimation();
                   } else {}
                 }
               }
@@ -120,6 +133,7 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
                       (state.lastAction!['type'] as String).toUpperCase();
 
                   setState(() {
+                    roundResultsMessage = state.actionResult ?? 'RESULT';
                     if (lastAction == 'CHALLENGE') {
                       message = 'LIAR';
                     } else if (lastAction == 'SPOT') {
@@ -137,7 +151,7 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
                       (state.lastAction!['type'] as String).toUpperCase();
 
                   setState(() {
-                    roundResultMessage = 'GAME OVER!';
+                    newRoundMessage = 'GAME OVER!';
 
                     if (lastAction == 'CHALLENGE') {
                       message = 'LIAR';
@@ -159,82 +173,91 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
                 children: [
                   AnimatedSwitcherPlus.translationTop(
                     duration: _transitionDuration,
-                    child: _showFirstChild
+                    child: _showGameInfo
                         ? Card(
                             key: const ValueKey(0),
                             margin: const EdgeInsets.all(8),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const SizedBox(height: 4),
-                                if (state.currentBid !=
-                                    const Bid(number: 1, value: 1))
-                                  const FittedBox(
-                                    alignment: Alignment.bottomCenter,
-                                    fit: BoxFit.scaleDown,
-                                    child: Text('Current Bid:'),
-                                  ),
-                                if (state.currentBid !=
-                                    const Bid(number: 1, value: 1))
-                                  Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: FittedBox(
-                                      alignment: Alignment.topCenter,
-                                      fit: BoxFit.scaleDown,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Dice(
-                                            value: state.currentBid.number,
-                                            isDie: false,
-                                          ),
-                                          Dice(value: state.currentBid.value),
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                else if (!_showRoundResult)
-                                  const Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Text('No Bids'),
-                                  )
-                                else if (_showRoundResult)
-                                  const Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Text('RESULTS'),
-                                  ),
-                              ],
-                            ),
-                          )
-                        : Card(
-                            key: const ValueKey(1),
-                            child: Center(
+                            child: AspectRatio(
+                              aspectRatio: 1,
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   const SizedBox(height: 4),
-                                  if (!_showRoundResult)
+                                  if (state.currentBid !=
+                                      const Bid(number: 1, value: 1))
+                                    const FittedBox(
+                                      alignment: Alignment.bottomCenter,
+                                      fit: BoxFit.scaleDown,
+                                      child: Text('Current Bid:'),
+                                    ),
+                                  if (state.currentBid !=
+                                      const Bid(number: 1, value: 1))
                                     Padding(
                                       padding: const EdgeInsets.all(8),
                                       child: FittedBox(
                                         alignment: Alignment.topCenter,
                                         fit: BoxFit.scaleDown,
-                                        child: Text(
-                                          message,
-                                          style: const TextStyle(fontSize: 40),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Dice(
+                                              value: state.currentBid.number,
+                                              isDie: false,
+                                            ),
+                                            Dice(value: state.currentBid.value),
+                                          ],
                                         ),
                                       ),
-                                    ),
-                                  if (_showRoundResult)
+                                    )
+                                  else if (!_showRoundResult)
+                                    const Padding(
+                                      padding: EdgeInsets.all(8),
+                                      child: Text('No Bids'),
+                                    )
+                                  else if (_showRoundResult)
                                     Padding(
                                       padding: const EdgeInsets.all(20),
-                                      child: Text(roundResultMessage),
+                                      child: Text(roundResultsMessage),
                                     ),
                                 ],
+                              ),
+                            ),
+                          )
+                        : Card(
+                            key: const ValueKey(1),
+                            margin: const EdgeInsets.all(8),
+                            child: AspectRatio(
+                              aspectRatio: 1,
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if (!_showRoundResult)
+                                      Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(
+                                            message,
+                                            style:
+                                                const TextStyle(fontSize: 40),
+                                          ),
+                                        ),
+                                      ),
+                                    if (_showRoundResult)
+                                      Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(newRoundMessage),
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),

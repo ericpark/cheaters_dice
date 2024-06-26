@@ -22,6 +22,7 @@ class GameViewMobile extends StatelessWidget {
                     state.order[state.turn % state.order.length];
 
                 final activePlayer = state.players[activePlayerId];
+
                 return SizedBox.expand(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -58,6 +59,7 @@ class GameViewMobile extends StatelessWidget {
                           child: PlayerDice(
                             hasRolled: state.hasRolled ?? false,
                             dice: state.players[state.currentUserId]!.dice,
+                            reveal: state.status == GameStatus.revealing,
                           ),
                         ),
                       ),

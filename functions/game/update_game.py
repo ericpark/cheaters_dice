@@ -53,7 +53,7 @@ def update_game_from_action(event: firestore_fn.Event[firestore_fn.DocumentSnaps
         update_data["winner"] = update_data["order"][0]
         firestore.client().collection('lobbies').document(game_data["lobby_id"]).update({'game_id': None,'status': 'waiting'})
 
-    update_data["last_action"] = {"id": last_action_data["id"], "type": last_action_data["action_type"]}
+    update_data["last_action"] = {"id": last_action_data["id"], "type": last_action_data["action_type"], "player_id": last_action_data["player_id"]}
     #Update the game in the database. This will push all the new state to the players.
     _update_game(firestore_client, game_id, update_data)
     _update_action(firestore_client, last_action_data, {"processed": True})
@@ -69,6 +69,17 @@ def _handle_bid_action(action_data: dict) -> dict | None:
 
     return {"current_bid": bid_update, "turn":action_data["turn"] + 1}
 # [END _handle_bid_action]
+
+# [START _handle_bid_action]
+def _handle_skip_action(action_data: dict) -> dict | None:
+    bid_update = {}
+    bid_update["player_id"] = action_data["bid"]["player_id"]
+    bid_update["number"] = action_data["bid"]["number"]
+    bid_update["value"] = action_data["bid"]["value"]
+
+    return {"current_bid": bid_update, "turn":action_data["turn"] + 1}
+# [END _handle_bid_action]
+
 
 
 # [START _actual_dice_count]

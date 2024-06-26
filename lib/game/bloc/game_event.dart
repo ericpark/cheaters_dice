@@ -9,22 +9,22 @@ sealed class GameEvent {
   const GameEvent();
 }
 
-class GameStart extends GameEvent {
-  const GameStart({required this.userId, required this.gameId});
+class GameCreated extends GameEvent {
+  const GameCreated({required this.userId, required this.gameId});
 
   final String userId;
   final String gameId;
 }
 
-class GameLoad extends GameEvent {
-  const GameLoad({required this.userId, required this.gameId});
+class GameLoaded extends GameEvent {
+  const GameLoaded({required this.userId, required this.gameId});
 
   final String userId;
   final String gameId;
 }
 
-class GameStateUpdate extends GameEvent {
-  const GameStateUpdate({required this.game});
+class GameStateUpdated extends GameEvent {
+  const GameStateUpdated({required this.game});
 
   //final Bid updatedBid;
   final Game? game;
@@ -33,25 +33,25 @@ class GameStateUpdate extends GameEvent {
 /// Round Start:
 ///
 /// Responsible for Calculating players, total_dice,
-class RoundStart extends GameEvent {
-  const RoundStart({required this.game});
+class RoundStarted extends GameEvent {
+  const RoundStarted({required this.game});
   final GameState game;
 }
 
 /// Rolled Dice
 ///
 /// Marks completion of rolling dice animation.
-class RolledDice extends GameEvent {}
+class DiceRollCompleted extends GameEvent {}
 
 /// Turn Start:
 ///
 /// Responsible for calculating the new user bid
-class ProcessTurnStart extends GameEvent {
-  const ProcessTurnStart({required this.game});
+class TurnProcessingStarted extends GameEvent {
+  const TurnProcessingStarted({required this.game});
   final GameState game;
 }
 
-class PlayerActionGameEvent extends GameEvent {}
+//class PlayerActionGameEvent extends GameEvent {}
 
 class PlayerUpdateUserBidGameEvent extends GameEvent {
   const PlayerUpdateUserBidGameEvent({
@@ -75,13 +75,14 @@ class PlayerSubmitSpotOnGameEvent extends GameEvent {
   const PlayerSubmitSpotOnGameEvent();
 }
 
-class AnimationCompleted extends GameEvent {}
+class RoundAnimationsCompleted extends GameEvent {}
 
 class TurnCompleted extends GameEvent {}
 
 class RoundCompleted extends GameEvent {
-  const RoundCompleted({required this.game});
+  const RoundCompleted({required this.game, required this.nextState});
   final GameState game;
+  final GameState nextState;
 }
 
 class GameCompleted extends GameEvent {}

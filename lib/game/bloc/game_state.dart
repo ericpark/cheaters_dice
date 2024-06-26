@@ -28,6 +28,7 @@ abstract class GameState with _$GameState {
     @Default(GameStatus.initial) GameStatus status,
     @Default(Bid()) Bid currentBid, // Last Accepted bid
     @Default(Bid()) Bid? userBid, // Bid by the current player
+    @Default(Bid()) Bid? lastBid, // Bid used for comparison calculations
     @Default(0) int? totalDice, // Total Dice of all players
     @Default(0) int round,
     @Default(0) int turn,
@@ -39,7 +40,7 @@ abstract class GameState with _$GameState {
     @Default('') String? currentUserId, // Current User Id
     Map<String, dynamic>? lastAction,
     bool? hasRolled,
-    // Last Action Id
+    String? actionResult,
   }) = _GameState;
 
   factory GameState.initial() => _GameState();

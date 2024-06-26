@@ -13,25 +13,9 @@ class PlayerActions extends StatelessWidget {
     return BlocBuilder<GameBloc, GameState>(
       builder: (context, state) {
         final currentUser = context.read<AuthCubit>().state.user?.id;
-        /* final isCurrentUser = (state.order.isNotEmpty
-                ? state.order[state.turn % state.order.length]
-                : '') ==
-            currentUser;
-
-        final bidsEqual = context
-                .read<GameBloc>()
-                .compareBids(state.currentBid, state.userBid!) ==
-            0;
-        */
-        /*final firstBid = state.currentBid.playerId == null;*/
-        /*final canBid =
-            ((isCurrentUser && !bidsEqual) || (isCurrentUser && firstBid)) &&
-                state.status == GameStatus.playing;*/
         final canLiar = state.currentBid.playerId != currentUser &&
             state.currentBid.playerId != null &&
             state.status == GameStatus.playing;
-        /*final canSpotOn =
-            isCurrentUser && bidsEqual && state.status == GameStatus.playing;*/
 
         return Container(
           decoration: BoxDecoration(
