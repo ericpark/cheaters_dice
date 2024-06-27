@@ -112,15 +112,47 @@ class _PlayerAvatarState extends State<PlayerAvatar>
                           backgroundColor: Colors.white,
                           radius: shorterSide * 0.45,
                           child: ClipOval(
-                            child: kIsWeb
-                                ? Image.network(widget.player.photo)
-                                : CachedNetworkImage(
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                if (kIsWeb)
+                                  Image.network(widget.player.photo)
+                                else
+                                  CachedNetworkImage(
                                     imageUrl: widget.player.photo,
                                     placeholder: (context, url) =>
                                         const CircularProgressIndicator(),
                                     errorWidget: (context, url, error) =>
                                         const Icon(Icons.error),
                                   ),
+                                Positioned.fill(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        stops: const [0.7, 1.0],
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Colors.black.withOpacity(0.05),
+                                          Colors.black.withOpacity(0.4),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: shorterSide * 0.08,
+                                    ),
+                                    child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(widget.player.name ?? '')),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

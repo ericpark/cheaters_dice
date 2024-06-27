@@ -9,7 +9,6 @@ class GameViewMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final playerOrder = context.read<GameBloc>().playerOrder;
-
     return Scaffold(
       body: Stack(
         alignment: Alignment.topCenter,
@@ -38,10 +37,7 @@ class GameViewMobile extends StatelessWidget {
                                 Center(
                                   child: PlayersContainer(
                                     activePlayerId: activePlayerId,
-                                    players: context
-                                            .read<GameBloc>()
-                                            .playerOrder
-                                            .isNotEmpty
+                                    players: playerOrder.isNotEmpty
                                         ? playerOrder
                                         : [],
                                   ),

@@ -45,8 +45,8 @@ class _PlayersLayoutState extends State<PlayersLayout> {
             height: avatarSize,
             width: avatarSize,
             child: PlayerAvatar(
-              player: widget.players[0],
-              active: widget.players[0].id == widget.activePlayerId,
+              player: widget.players[i - 1],
+              active: widget.players[i - 1].id == widget.activePlayerId,
             ),
           ),
         ),
