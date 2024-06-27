@@ -326,7 +326,7 @@ class _CurrentBidDisplay extends StatelessWidget {
               ],
             ),
           ),
-        )
+        ),
       ],
     );
   }

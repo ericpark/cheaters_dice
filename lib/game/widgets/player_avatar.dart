@@ -2,9 +2,9 @@ import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cheaters_dice/constants.dart';
 import 'package:cheaters_dice/game/game.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 class PlayerAvatar extends StatefulWidget {
   const PlayerAvatar({
@@ -78,14 +78,14 @@ class _PlayerAvatarState extends State<PlayerAvatar>
           listener: (context, state) {
             if (state.status == GameStatus.revealing) {
               if (state.lastAction != null) {
-                /*final lastAction =
+                final lastAction =
                     (state.lastAction!['type'] as String).toUpperCase();
 
                 if (lastAction == 'CHALLENGE') {
                   _playAnimation();
                 } else if (lastAction == 'SPOT') {
                   _playAnimation();
-                }*/
+                }
               }
             }
           },
