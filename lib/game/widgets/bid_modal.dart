@@ -92,17 +92,20 @@ class BidModal extends StatelessWidget {
                 : '') ==
             currentUser;
 
+        final buttonEnabled =
+            isCurrentUser && state.status == GameStatus.playing;
+
         return FilledButton(
           style: FilledButton.styleFrom(
             backgroundColor: Colors.white,
             foregroundColor: Theme.of(context).primaryColor,
             side: BorderSide(
               color:
-                  isCurrentUser ? Theme.of(context).primaryColor : Colors.grey,
+                  buttonEnabled ? Theme.of(context).primaryColor : Colors.grey,
               width: 2,
             ),
           ),
-          onPressed: isCurrentUser && state.status == GameStatus.playing
+          onPressed: buttonEnabled
               ? () {
                   WoltModalSheet.show<void>(
                     context: context,

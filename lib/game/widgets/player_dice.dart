@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class PlayerDice extends StatefulWidget {
-  const PlayerDice(
-      {required this.dice,
-      required this.hasRolled,
-      required this.reveal,
-      super.key});
+  const PlayerDice({
+    required this.dice,
+    required this.hasRolled,
+    required this.reveal,
+    super.key,
+  });
 
   final bool hasRolled;
   final List<Die> dice;

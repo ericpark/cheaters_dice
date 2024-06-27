@@ -115,7 +115,7 @@ class LobbyCubit extends Cubit<LobbyState> {
       'lobby_id': lobbyId,
       'players': players,
       'host_id': hostId,
-      'starting_dice': 3,
+      'starting_dice': 5,
     });
     final gameId = result.data;
     return gameId['game_id'] as String;

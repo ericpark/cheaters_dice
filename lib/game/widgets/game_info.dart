@@ -23,6 +23,7 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
   String message = '-';
   String newRoundMessage = 'NEW ROUND';
   String roundResultsMessage = '';
+  int test = 0;
 
   @override
   void initState() {
@@ -45,12 +46,14 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
       // Show Challenge or Spot on
       setState(() {
         _showGameInfo = !_showGameInfo;
+        test += 1;
       });
       await Future<void>.delayed(_transitionDuration);
 
       // Show Current Bid
       setState(() {
         _showGameInfo = !_showGameInfo;
+        test += 1;
       });
 
       await Future<void>.delayed(_transitionDuration).then(
@@ -68,6 +71,7 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
       // Show Challenge or Spot on
       setState(() {
         _showGameInfo = !_showGameInfo;
+        test += 1;
       });
       await Future<void>.delayed(_transitionDuration);
 
@@ -75,6 +79,7 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
       setState(() {
         _showGameInfo = !_showGameInfo;
         _showRoundResult = !_showRoundResult;
+        test += 1;
       });
       await Future<void>.delayed(_transitionDuration);
 
@@ -86,6 +91,7 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
       // Show Result
       setState(() {
         _showGameInfo = !_showGameInfo;
+        test += 1;
       });
       await Future<void>.delayed(_transitionDuration);
 
@@ -118,13 +124,9 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
                       (state.lastAction!['type'] as String).toUpperCase();
 
                   setState(() {
-                    if (lastAction == 'BID') {
-                      message = lastAction;
-                    }
+                    message = lastAction;
                   });
-                  if (lastAction == 'BID') {
-                    _playEndTurnAnimation();
-                  } else {}
+                  _playEndTurnAnimation();
                 }
               }
               if (state.status == GameStatus.revealing) {
@@ -175,59 +177,7 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
                     duration: _transitionDuration,
                     child: _showGameInfo
                         ? Card(
-                            key: const ValueKey(0),
-                            margin: const EdgeInsets.all(8),
-                            child: AspectRatio(
-                              aspectRatio: 1,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const SizedBox(height: 4),
-                                  if (state.currentBid !=
-                                      const Bid(number: 1, value: 1))
-                                    const FittedBox(
-                                      alignment: Alignment.bottomCenter,
-                                      fit: BoxFit.scaleDown,
-                                      child: Text('Current Bid:'),
-                                    ),
-                                  if (state.currentBid !=
-                                      const Bid(number: 1, value: 1))
-                                    Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: FittedBox(
-                                        alignment: Alignment.topCenter,
-                                        fit: BoxFit.scaleDown,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Dice(
-                                              value: state.currentBid.number,
-                                              isDie: false,
-                                            ),
-                                            Dice(value: state.currentBid.value),
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                  else if (!_showRoundResult)
-                                    const Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: Text('No Bids'),
-                                    )
-                                  else if (_showRoundResult)
-                                    Padding(
-                                      padding: const EdgeInsets.all(20),
-                                      child: Text(roundResultsMessage),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          )
-                        : Card(
-                            key: const ValueKey(1),
+                            key: ValueKey(test),
                             margin: const EdgeInsets.all(8),
                             child: AspectRatio(
                               aspectRatio: 1,
@@ -236,30 +186,55 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    if (!_showRoundResult)
+                                    const SizedBox(height: 4),
+                                    if (state.currentBid !=
+                                        const Bid(number: 1, value: 1))
+                                      const FittedBox(
+                                        alignment: Alignment.bottomCenter,
+                                        fit: BoxFit.scaleDown,
+                                        child: Text('Current Bid:'),
+                                      ),
+                                    if (state.currentBid !=
+                                        const Bid(number: 1, value: 1))
                                       Padding(
                                         padding: const EdgeInsets.all(8),
                                         child: FittedBox(
+                                          alignment: Alignment.topCenter,
                                           fit: BoxFit.scaleDown,
-                                          child: Text(
-                                            message,
-                                            style:
-                                                const TextStyle(fontSize: 40),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Dice(
+                                                value: state.currentBid.number,
+                                                isDie: false,
+                                              ),
+                                              Dice(
+                                                value: state.currentBid.value,
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                      ),
-                                    if (_showRoundResult)
+                                      )
+                                    else if (!_showRoundResult)
+                                      const _NoBids()
+                                    else if (_showRoundResult)
                                       Padding(
-                                        padding: const EdgeInsets.all(8),
-                                        child: FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: Text(newRoundMessage),
-                                        ),
+                                        padding: const EdgeInsets.all(20),
+                                        child: Text(roundResultsMessage),
                                       ),
                                   ],
                                 ),
                               ),
                             ),
+                          )
+                        : _GameInfoCard(
+                            key: ValueKey(test),
+                            test: test,
+                            showRoundResult: _showRoundResult,
+                            message: message,
+                            newRoundMessage: newRoundMessage,
                           ),
                   ),
                 ],
@@ -268,6 +243,73 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
           );
         },
       ),
+    );
+  }
+}
+
+class _GameInfoCard extends StatelessWidget {
+  const _GameInfoCard({
+    required this.test,
+    required bool showRoundResult,
+    required this.message,
+    required this.newRoundMessage,
+    super.key,
+  }) : _showRoundResult = showRoundResult;
+
+  final int test;
+  final bool _showRoundResult;
+  final String message;
+  final String newRoundMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      key: key,
+      margin: const EdgeInsets.all(8),
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (!_showRoundResult)
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      message,
+                      style: const TextStyle(fontSize: 40),
+                    ),
+                  ),
+                ),
+              if (_showRoundResult)
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(newRoundMessage),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NoBids extends StatelessWidget {
+  const _NoBids({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.all(8),
+      child: Text('No Bids'),
     );
   }
 }

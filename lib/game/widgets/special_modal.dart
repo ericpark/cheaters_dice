@@ -15,8 +15,8 @@ class SpecialModal extends StatelessWidget {
 
   static final buttonCarouselController = CarouselController();
 
-  void onPressed(BuildContext context) {
-    context.read<GameBloc>().add(const PlayerSubmitSpotOnGameEvent());
+  void onPressed(BuildContext context, {required PlayerActionType action}) {
+    context.read<GameBloc>().add(PlayerActionSubmitted(action: action));
     Navigator.of(context).pop();
   }
 
@@ -57,6 +57,7 @@ class SpecialModal extends StatelessWidget {
                         ? state.order[state.turn % state.order.length]
                         : '') ==
                     currentUser;
+                final firstBid = state.currentBid.playerId == null;
 
                 final bidsEqual = context
                         .read<GameBloc>()
@@ -66,11 +67,34 @@ class SpecialModal extends StatelessWidget {
                 final canSpotOn = isCurrentUser &&
                     bidsEqual &&
                     state.status == GameStatus.playing;
+                final canSkip = !firstBid &&
+                    isCurrentUser &&
+                    state.status == GameStatus.playing;
+                final allActions = [
+                  {
+                    'name': 'Spot On',
+                    'description': AppConstants.spotOnDescription,
+                    'action': PlayerActionType.spot,
+                    'enabled': canSpotOn,
+                  },
+                  {
+                    'name': 'Skip',
+                    'description': AppConstants.skipDescription,
+                    'action': PlayerActionType.skip,
+                    'enabled': canSkip,
+                  },
+                  {
+                    'name': 'Reverse',
+                    'description': AppConstants.reverseDescription,
+                    'action': PlayerActionType.reverse,
+                    'enabled': canSkip,
+                  },
+                ];
                 return ExpandableCarousel(
                   options: CarouselOptions(
                     showIndicator: false,
                   ),
-                  items: [1].map((i) {
+                  items: allActions.map((action) {
                     return Builder(
                       builder: (BuildContext context) {
                         return SizedBox(
@@ -79,27 +103,38 @@ class SpecialModal extends StatelessWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Padding(
+                              Padding(
                                 padding: standardPadding,
                                 child: SizedBox(
                                   height: _buttonHeight,
                                   width: double.infinity,
-                                  child: Center(child: Text('Spot On')),
+                                  child: Center(
+                                    child: Text(action['name']! as String),
+                                  ),
                                 ),
                               ),
-                              const Expanded(
-                                child: Text(AppConstants.spotOnDescription),
+                              Expanded(
+                                child: Text(action['description']! as String),
                               ),
                               Padding(
                                 padding: standardPadding,
                                 child: ElevatedButton(
-                                  onPressed: canSpotOn
-                                      ? () => onPressed(context)
+                                  onPressed: action['enabled']! as bool
+                                      ? () => onPressed(
+                                            context,
+                                            action: action['action']!
+                                                as PlayerActionType,
+                                          )
                                       : null,
-                                  child: const SizedBox(
+                                  child: SizedBox(
                                     height: _buttonHeight,
                                     width: double.infinity,
-                                    child: Center(child: Text('SPOT ON')),
+                                    child: Center(
+                                      child: Text(
+                                        (action['name']! as String)
+                                            .toUpperCase(),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),

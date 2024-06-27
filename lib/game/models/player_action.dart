@@ -5,7 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'generated/player_action.g.dart';
 part 'generated/player_action.freezed.dart';
 
-enum PlayerActionType { bid, challenge, spot }
+enum PlayerActionType { bid, challenge, spot, skip, reverse }
 
 extension PlayerActionTypeX on PlayerActionType {
   bool get isBid => this == PlayerActionType.bid;

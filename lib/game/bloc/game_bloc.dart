@@ -27,14 +27,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<RoundStarted>(_onRoundStarted);
     on<DiceRollCompleted>(_onRolledDice);
     on<TurnProcessingStarted>(_onTurnProcessingStarted);
-    //on<PlayerActionGameEvent>(_onPlayerAction);
+    on<PlayerActionSubmitted>(_onPlayerActionSubmitted);
     on<PlayerUpdateUserBidGameEvent>(_onPlayerUpdateBid);
     on<PlayerSubmitBidGameEvent>(_onPlayerSubmitBid);
     on<PlayerSubmitLiarGameEvent>(_onPlayerLiar);
     on<PlayerSubmitSpotOnGameEvent>(_onPlayerSpotOn);
     on<RoundAnimationsCompleted>(_onRoundAnimationsCompleted);
     on<TurnCompleted>(_onTurnComplete);
-    on<RoundCompleted>(_onRoundComplete);
+    on<RoundCompleted>(_onRoundCompleted);
 
     on<GameCompleted>(_onGameComplete);
   }
@@ -155,10 +155,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
 
     if (serverGameState.status == GameStatus.finished) {
-      //await Future<void>.delayed(const Duration(seconds: 5));
-      add(TurnProcessingStarted(game: serverGameState));
-      await Future<void>.delayed(const Duration(seconds: 2));
-
       emit(serverGameState.copyWith(status: GameStatus.finished));
     }
   }
@@ -190,10 +186,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   /// during the animations. [status] set to [GameStatus.revealing]
   /// triggers animations. Once animations are done, the round animations
   /// complete event is added.
-  FutureOr<void> _onRoundComplete(
+  FutureOr<void> _onRoundCompleted(
     RoundCompleted event,
     Emitter<GameState> emit,
   ) {
+    debugPrint('Game Round Completing');
     // Calculate the total dice
     final totalDice = calculateTotalDice(game: event.game);
 
@@ -203,26 +200,29 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         : event.game.currentBid;
     // Set the lastBid to the current state's currentBid for comparison purposes
     final lastBid = state.currentBid;
+    final losers = event.game.players.entries
+        .where(
+          (player) =>
+              player.value.dice.length >
+              event.nextState.players[player.key]!.dice.length,
+        )
+        .map((player) => player.value.name)
+        .toList();
 
     final String? actionResult;
     if (event.game.lastAction?['type'] == 'challenge') {
-      final challengerId = event.game.lastAction!['player_id'] as String;
-      if (event.game.players[challengerId]!.dice.length >
-          event.nextState.players[challengerId]!.dice.length) {
-        actionResult = '${event.game.players[challengerId]!.name} LOSES 1 DICE';
-        // Challenger loses dice
-      } else {
-        actionResult = '${event.game.players[challengerId]!.name} IS CORRECT';
-      }
+      actionResult = '${losers[0]} LOSES 1 DIE';
     } else if (event.game.lastAction?['type'] == 'spot') {
       final challengerId = event.game.lastAction!['player_id'] as String;
-
+      // Checking against the next state to see if the challenger lost dice
+      // Can't check length because it could be 1v1
       if (event.game.players[challengerId]!.dice.length >
           event.nextState.players[challengerId]!.dice.length) {
         // Challenger loses dice
-        actionResult = '${event.game.players[challengerId]!.name} LOSES 2 DICE';
+        actionResult = '${losers[0]} LOSES 2 DICE';
       } else {
-        actionResult = 'EVERYONE LOSES 1 DIE';
+        final challengerName = event.game.players[challengerId]!.name;
+        actionResult = 'EVERYONE LOSES 1 DIE EXCEPT $challengerName';
       }
     } else {
       actionResult = null;
@@ -246,7 +246,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     TurnProcessingStarted event,
     Emitter<GameState> emit,
   ) {
-    debugPrint('Turn Processing Started (BID, ..TBD)');
+    debugPrint('Turn Processing Started (BID, SKIP, REVERSE, ETC)');
     // Calculate the total dice
     final totalDice = calculateTotalDice(game: event.game);
 
@@ -375,6 +375,40 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   FutureOr<void> _onPlayerSpotOn(event, Emitter<GameState> emit) async {
     final newAction = game_repository.Action(
       actionType: game_repository.ActionType.spot,
+      playerId: state.order[state.turn % state.order.length],
+      round: state.round,
+      turn: state.turn,
+      gameId: state.id!,
+    );
+
+    final success =
+        await _gameRepository.addPlayerAction(playerAction: newAction);
+
+    //Do not emit if there's an error.
+    if (!success) return;
+
+    /*emit(
+      state.copyWith(turn: 0, round: state.round + 1, userBid: Bid.minimum()),
+    );*/
+  }
+
+  FutureOr<void> _onPlayerActionSubmitted(
+    PlayerActionSubmitted event,
+    Emitter<GameState> emit,
+  ) async {
+    game_repository.ActionType actionType;
+    if (event.action == PlayerActionType.spot) {
+      actionType = game_repository.ActionType.spot;
+    } else if (event.action == PlayerActionType.skip) {
+      actionType = game_repository.ActionType.skip;
+    } else if (event.action == PlayerActionType.reverse) {
+      actionType = game_repository.ActionType.reverse;
+    } else {
+      return;
+    }
+
+    final newAction = game_repository.Action(
+      actionType: actionType,
       playerId: state.order[state.turn % state.order.length],
       round: state.round,
       turn: state.turn,

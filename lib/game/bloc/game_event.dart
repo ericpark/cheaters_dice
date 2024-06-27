@@ -51,8 +51,6 @@ class TurnProcessingStarted extends GameEvent {
   final GameState game;
 }
 
-//class PlayerActionGameEvent extends GameEvent {}
-
 class PlayerUpdateUserBidGameEvent extends GameEvent {
   const PlayerUpdateUserBidGameEvent({
     required this.bidPart,
@@ -73,6 +71,12 @@ class PlayerSubmitLiarGameEvent extends GameEvent {
 
 class PlayerSubmitSpotOnGameEvent extends GameEvent {
   const PlayerSubmitSpotOnGameEvent();
+}
+
+class PlayerActionSubmitted extends GameEvent {
+  const PlayerActionSubmitted({required this.action});
+
+  final PlayerActionType action;
 }
 
 class RoundAnimationsCompleted extends GameEvent {}

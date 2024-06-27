@@ -26,6 +26,8 @@ class _PlayerAvatarState extends State<PlayerAvatar>
       const Duration(milliseconds: AppConstants.diceTransitionDuration);
   bool _shouldReveal = false;
 
+  Color borderColor = Colors.black;
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +66,8 @@ class _PlayerAvatarState extends State<PlayerAvatar>
 
   @override
   Widget build(BuildContext context) {
+    borderColor = widget.active ? Colors.green : Colors.black;
+
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return BlocConsumer<GameBloc, GameState>(
@@ -78,6 +82,11 @@ class _PlayerAvatarState extends State<PlayerAvatar>
                 } else if (lastAction == 'SPOT') {
                   _playAnimation();
                 }*/
+
+                print(
+                  '''${widget.player.dice.length}=>${state.players[widget.player.id]!.dice.length}''',
+                );
+                print('''${state.currentBid} => ${state.lastBid}''');
                 _playAnimation();
               }
             }
@@ -95,7 +104,7 @@ class _PlayerAvatarState extends State<PlayerAvatar>
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: widget.active ? Colors.green : Colors.black,
+                            color: borderColor,
                             width: 2,
                           ),
                           borderRadius:

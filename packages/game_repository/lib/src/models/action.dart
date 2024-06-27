@@ -7,7 +7,7 @@ part 'generated/action.g.dart';
 part 'generated/action.firestore_converter.dart';
 part 'generated/action.freezed.dart';
 
-enum ActionType { bid, challenge, spot }
+enum ActionType { bid, challenge, spot, skip, reverse }
 
 @freezed
 @FirestoreConverter(defaultPath: 'actions')

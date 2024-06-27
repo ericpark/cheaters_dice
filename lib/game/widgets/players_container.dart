@@ -108,7 +108,7 @@ class _PlayersContainerState extends State<PlayersContainer>
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                   ),
-                  duration: const Duration(milliseconds: 3000),
+                  duration: const Duration(milliseconds: 5000),
                 ),
                 ScaleAnimatedText(
                   'WINNER: $winner'.toUpperCase(),
@@ -116,7 +116,7 @@ class _PlayersContainerState extends State<PlayersContainer>
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                   ),
-                  duration: const Duration(milliseconds: 5000),
+                  duration: const Duration(milliseconds: 8000),
                 ),
               ],
             );

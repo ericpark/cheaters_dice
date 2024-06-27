@@ -42,6 +42,12 @@ def update_game_from_action(event: firestore_fn.Event[firestore_fn.DocumentSnaps
         update_data["players"] = _rerollAllPlayersDice(players=update_data["players"])
         #update_data["status"] = "revealing"
 
+    if last_action_data["action_type"] == "skip":
+        update_data = _handle_skip_action(action_data=last_action_data, game_data=game_data)
+        update_data["order"] = game_data["order"]
+
+    if last_action_data["action_type"] == "reverse":
+        update_data = _handle_reverse_action(action_data=last_action_data, game_data=game_data)
 
     #TODO: Optional flag to shuffle between rounds?
     #shuffle_between_rounds = game_data.get("shuffle_between_rounds", False)
@@ -70,16 +76,30 @@ def _handle_bid_action(action_data: dict) -> dict | None:
     return {"current_bid": bid_update, "turn":action_data["turn"] + 1}
 # [END _handle_bid_action]
 
-# [START _handle_bid_action]
-def _handle_skip_action(action_data: dict) -> dict | None:
+# [START _handle_skip_action]
+def _handle_skip_action(action_data: dict, game_data: dict) -> dict | None:
     bid_update = {}
-    bid_update["player_id"] = action_data["bid"]["player_id"]
-    bid_update["number"] = action_data["bid"]["number"]
-    bid_update["value"] = action_data["bid"]["value"]
+    bid_update["player_id"] = action_data["player_id"]
+    bid_update["number"] = game_data["current_bid"]["number"]
+    bid_update["value"] = game_data["current_bid"]["value"]
 
-    return {"current_bid": bid_update, "turn":action_data["turn"] + 1}
-# [END _handle_bid_action]
+    return {"current_bid": bid_update, "turn":game_data["turn"] + 1}
+# [END _handle_skip_action]
 
+# [START _handle_reverse_action]
+def _handle_reverse_action(action_data: dict, game_data: dict) -> dict | None:
+    bid_update = {}
+    bid_update["player_id"] = action_data["player_id"]
+    bid_update["number"] = game_data["current_bid"]["number"]
+    bid_update["value"] = game_data["current_bid"]["value"]
+    
+
+    player_index = game_data["order"].index(action_data["player_id"])
+    new_order = game_data["order"][::-1]
+    new_order = new_order[player_index:] + new_order[:player_index]
+
+    return {"current_bid": bid_update, "turn":game_data["turn"] + 1, "order": new_order}
+# [END _handle_reverse_action]
 
 
 # [START _actual_dice_count]
