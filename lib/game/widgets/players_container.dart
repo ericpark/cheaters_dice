@@ -22,13 +22,9 @@ class PlayersContainer extends StatefulWidget {
 
 class _PlayersContainerState extends State<PlayersContainer>
     with TickerProviderStateMixin {
-  //bool showAnimation = false;
-  //bool gameIsFinished = false;
   String message = '-';
   Widget animationWidget = Container();
   late AnimationController animation;
-  //late Animation<double> _fadeInFadeOut;
-  //bool _showFirstChild = true;
 
   @override
   void initState() {
@@ -38,7 +34,6 @@ class _PlayersContainerState extends State<PlayersContainer>
       duration: const Duration(seconds: 1),
       reverseDuration: const Duration(seconds: 3),
     );
-    //_fadeInFadeOut = Tween<double>(begin: 0, end: 1).animate(animation);
   }
 
   @override
@@ -46,81 +41,47 @@ class _PlayersContainerState extends State<PlayersContainer>
     animation.dispose();
     super.dispose();
   }
-/*
-  void runAnimation(String? message) {
-    setState(() {
-      this.message = message ?? this.message;
-    });
-
-    _playAnimation();
-  }
-
-  Future<void> _playAnimation() async {
-    try {
-      await animation.forward();
-      setState(() {
-        _showFirstChild = !_showFirstChild;
-      });
-      await Future<void>.delayed(const Duration(seconds: 3));
-      await animation.reverse();
-      context.read<GameBloc>().add(TurnCompleted());
-    } on TickerCanceled {
-      // The animation got canceled, probably because it was disposed of.
-    }
-  }*/
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<GameBloc, GameState>(
       listener: (context, state) {
-        /*if (state.status == GameStatus.transitioning) {
-          setState(() {
-            if (state.lastAction != null) {
-              runAnimation((state.lastAction!['type'] as String).toUpperCase());
-            }
-          });
-          }*/
         if (state.status == GameStatus.finished) {
           final winner = state.players[state.winner!]!.name ??
               state.players[state.winner!]!.id;
-          setState(() {
-            animationWidget = AnimatedTextKit(
-              totalRepeatCount: 1,
-              onFinished: () {
-                setState(() {
-                  animationWidget = Container();
-                  context.go('/lobby/${state.lobbyId}');
-                  context.read<GameBloc>().add(GameCompleted());
-                });
-              },
-              animatedTexts: [
-                /* FadeAnimatedText(
-                  (state.lastAction!['type'] as String).toUpperCase(),
-                  textStyle: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
+
+          Future<void>.delayed(const Duration(seconds: 5)).then(
+            (value) => setState(() {
+              animationWidget = AnimatedTextKit(
+                totalRepeatCount: 1,
+                onFinished: () {
+                  setState(() {
+                    animationWidget = Container();
+                    context.go('/lobby/${state.lobbyId}');
+                    context.read<GameBloc>().add(GameReset());
+                  });
+                },
+                animatedTexts: [
+                  FadeAnimatedText(
+                    'GAME OVER!'.toUpperCase(),
+                    textStyle: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    duration: const Duration(milliseconds: 5000),
                   ),
-                  duration: const Duration(milliseconds: 3000),
-                ),*/
-                FadeAnimatedText(
-                  'GAME OVER!'.toUpperCase(),
-                  textStyle: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
+                  ScaleAnimatedText(
+                    'WINNER: $winner'.toUpperCase(),
+                    textStyle: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    duration: const Duration(milliseconds: 8000),
                   ),
-                  duration: const Duration(milliseconds: 5000),
-                ),
-                ScaleAnimatedText(
-                  'WINNER: $winner'.toUpperCase(),
-                  textStyle: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  duration: const Duration(milliseconds: 8000),
-                ),
-              ],
-            );
-          });
+                ],
+              );
+            }),
+          );
         }
       },
       builder: (context, state) {
@@ -133,38 +94,6 @@ class _PlayersContainerState extends State<PlayersContainer>
                 activePlayerId: widget.activePlayerId,
               ),
               Center(child: animationWidget),
-              /*Center(
-                child: AnimatedSwitcherPlus.translationTop(
-                  duration: const Duration(milliseconds: 3000),
-                  child: _showFirstChild
-                      ? FadeTransition(
-                          opacity: _fadeInFadeOut,
-                          child: Card(
-                            key: const ValueKey(0),
-                            child: SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.3,
-                              width: MediaQuery.of(context).size.height * 0.3,
-                              child: Center(
-                                child: Text(
-                                  message,
-                                  style: const TextStyle(fontSize: 40),
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
-                      : FadeTransition(
-                          opacity: _fadeInFadeOut,
-                          child: SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.3,
-                            width: MediaQuery.of(context).size.height * 0.3,
-                            child: const GameInfo(
-                              key: ValueKey(1),
-                            ),
-                          ),
-                        ),
-                ),
-              ),*/
             ],
           ),
         );

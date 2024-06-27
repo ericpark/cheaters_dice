@@ -82,12 +82,6 @@ class _PlayerAvatarState extends State<PlayerAvatar>
                 } else if (lastAction == 'SPOT') {
                   _playAnimation();
                 }*/
-
-                print(
-                  '''${widget.player.dice.length}=>${state.players[widget.player.id]!.dice.length}''',
-                );
-                print('''${state.currentBid} => ${state.lastBid}''');
-                _playAnimation();
               }
             }
           },

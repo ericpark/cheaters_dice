@@ -89,4 +89,10 @@ class RoundCompleted extends GameEvent {
   final GameState nextState;
 }
 
-class GameCompleted extends GameEvent {}
+class GameCompleted extends GameEvent {
+  const GameCompleted({required this.game, required this.nextState});
+  final GameState game;
+  final GameState nextState;
+}
+
+class GameReset extends GameEvent {}

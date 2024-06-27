@@ -36,7 +36,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<TurnCompleted>(_onTurnComplete);
     on<RoundCompleted>(_onRoundCompleted);
 
-    on<GameCompleted>(_onGameComplete);
+    on<GameCompleted>(_onGameCompleted);
+    on<GameReset>(_onGameReset);
   }
 
   final GameRepository _gameRepository;
@@ -125,7 +126,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       add(RoundStarted(game: serverGameState));
       // Might be necessary for the listener to pick up.
       //add(AnimationCompleted());
-    } else if (state.status == GameStatus.playing &&
+    } else if ((state.status == GameStatus.playing ||
+            state.status == GameStatus.transitioning) &&
         serverGameState.status == GameStatus.playing &&
         state.turn != 0 &&
         serverGameState.turn == 0) {
@@ -149,13 +151,23 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       // add(AnimationCompleted());
     }
     // Normal Turn ended
-    else if (state.status == GameStatus.playing &&
+    else if ((state.status == GameStatus.playing ||
+            state.status == GameStatus.transitioning) &&
         serverGameState.status == GameStatus.playing) {
       add(TurnProcessingStarted(game: serverGameState));
     }
 
     if (serverGameState.status == GameStatus.finished) {
-      emit(serverGameState.copyWith(status: GameStatus.finished));
+      add(
+        GameCompleted(
+          game: serverGameState.copyWith(players: state.players),
+          nextState: serverGameState,
+        ),
+      );
+      await Future<void>.delayed(const Duration(seconds: 5));
+      await Future<void>.delayed(const Duration(seconds: 5));
+
+      emit(state.copyWith(players: serverGameState.players));
     }
   }
 
@@ -276,10 +288,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   ) async {
     emit(state.copyWith(status: GameStatus.playing));
   }
-  /*
-  FutureOr<void> _onPlayerAction(event, Emitter<GameState> emit) {
-    emit(state.copyWith(status: GameStatus.playing));
-  }*/
 
   FutureOr<void> _onPlayerUpdateBid(
     PlayerUpdateUserBidGameEvent event,
@@ -343,13 +351,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     //Do not emit if there's an error.
     if (!success) return;
 
-    /*emit(
-      state.copyWith(
-        currentBid: updatedBid,
-        userBid: updatedBid,
-        turn: state.turn + 1,
-      ),
-    );*/
+    //emit(state.copyWith(status: GameStatus.transitioning));
   }
 
   FutureOr<void> _onPlayerLiar(event, Emitter<GameState> emit) async {
@@ -367,9 +369,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     //Do not emit if there's an error.
     if (!success) return;
 
-    /*emit(
-      state.copyWith(turn: 0, round: state.round + 1, userBid: Bid.minimum()),
-    );*/
+    //emit(state.copyWith(status: GameStatus.transitioning));
   }
 
   FutureOr<void> _onPlayerSpotOn(event, Emitter<GameState> emit) async {
@@ -390,6 +390,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     /*emit(
       state.copyWith(turn: 0, round: state.round + 1, userBid: Bid.minimum()),
     );*/
+    //emit(state.copyWith(status: GameStatus.transitioning));
   }
 
   FutureOr<void> _onPlayerActionSubmitted(
@@ -421,13 +422,64 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     //Do not emit if there's an error.
     if (!success) return;
 
-    /*emit(
-      state.copyWith(turn: 0, round: state.round + 1, userBid: Bid.minimum()),
-    );*/
+    //emit(state.copyWith(status: GameStatus.transitioning));
   }
 
   /// Reset the game state to initial before going back to lobby
-  FutureOr<void> _onGameComplete(event, Emitter<GameState> emit) async {
+  FutureOr<void> _onGameCompleted(
+    GameCompleted event,
+    Emitter<GameState> emit,
+  ) async {
+    debugPrint('Game Round Completing');
+    // Calculate the total dice
+    //final totalDice = calculateTotalDice(game: event.game);
+
+    // Set the userBid to the currentBid if it's the first turn
+    final userBid = event.game.currentBid == Bid.initial()
+        ? Bid.minimum()
+        : event.game.currentBid;
+    // Set the lastBid to the current state's currentBid for comparison purposes
+    final lastBid = state.currentBid;
+    final losers = event.game.players.entries
+        .where(
+          (player) =>
+              player.value.dice.length >
+              event.nextState.players[player.key]!.dice.length,
+        )
+        .map((player) => player.value.name)
+        .toList();
+
+    final String? actionResult;
+    if (event.game.lastAction?['type'] == 'challenge') {
+      actionResult = '${losers[0]} LOSES 1 DIE';
+    } else if (event.game.lastAction?['type'] == 'spot') {
+      final challengerId = event.game.lastAction!['player_id'] as String;
+      // Checking against the next state to see if the challenger lost dice
+      // Can't check length because it could be 1v1
+      if (event.game.players[challengerId]!.dice.length >
+          event.nextState.players[challengerId]!.dice.length) {
+        // Challenger loses dice
+        actionResult = '${losers[0]} LOSES 2 DICE';
+      } else {
+        final challengerName = event.game.players[challengerId]!.name;
+        actionResult = 'EVERYONE LOSES 1 DIE EXCEPT $challengerName';
+      }
+    } else {
+      actionResult = null;
+    }
+    emit(
+      event.game.copyWith(
+        lastBid: lastBid,
+        userBid: userBid,
+        //totalDice: totalDice,
+        actionResult: actionResult,
+        status: GameStatus.finished,
+      ),
+    );
+  }
+
+  /// Reset the game state to initial before going back to lobby
+  FutureOr<void> _onGameReset(event, Emitter<GameState> emit) async {
     emit(GameState.initial());
   }
 
