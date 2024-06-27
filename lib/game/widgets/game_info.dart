@@ -19,7 +19,7 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
   final Duration _diceTransitionDuration =
       const Duration(milliseconds: AppConstants.diceTransitionDuration);
 
-  bool _showNoBid = false;
+  //bool _showNoBid = false;
   bool _showPlayerActionDisplay = false;
   bool _showCurrentBid = true;
   bool _showRoundResult = false;
@@ -117,12 +117,12 @@ class _GameInfoState extends State<GameInfo> with TickerProviderStateMixin {
 
       setState(() {
         if (!finished) {
-          _showNoBid = true;
+          //_showNoBid = true;
           //_showTransitionMessage = true;
 
           cardKeyValue += 1;
         } else {
-          _showNoBid = false;
+          //_showNoBid = false;
           _showTransitionMessage = true;
           transitionMessage = 'Returning back to lobby!';
           cardKeyValue += 1;
