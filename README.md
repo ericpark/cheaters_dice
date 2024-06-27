@@ -24,12 +24,19 @@ To run the desired flavor either use the launch configuration in VSCode/Android 
 # Development
 $ flutter run --flavor development --target lib/main_development.dart
 
+# Web
+$ flutter run --flavor development --target lib/main_development.dart  -d chrome --web-renderer html 
+
 # Staging
 $ flutter run --flavor staging --target lib/main_staging.dart
 
 # Production
 $ flutter run --flavor production --target lib/main_production.dart
+
+
 ```
+
+
 
 _\*Cheaters Dice works on iOS, Android, Web, and Windows._
 

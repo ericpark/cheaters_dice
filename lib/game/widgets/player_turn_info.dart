@@ -21,6 +21,7 @@ class PlayerTurnInfo extends StatelessWidget {
 
     return Card(
       child: Container(
+        padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           border: Border.all(
             color: currentPlayerTurn ? Colors.green : Colors.black,
@@ -31,7 +32,7 @@ class PlayerTurnInfo extends StatelessWidget {
         alignment: Alignment.center,
         height: 30,
         width: 100,
-        child: Text(currentPlayerName),
+        child: FittedBox(fit: BoxFit.scaleDown, child: Text(currentPlayerName)),
       ),
     );
   }

@@ -31,28 +31,36 @@ class GameViewMobile extends StatelessWidget {
                       Expanded(
                         flex: 10,
                         child: SizedBox.expand(
-                          child: Stack(
-                            children: [
-                              Center(
-                                child: PlayersContainer(
-                                  activePlayerId: activePlayerId,
-                                  players: context
-                                          .read<GameBloc>()
-                                          .playerOrder
-                                          .isNotEmpty
-                                      ? playerOrder
-                                      : [],
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Stack(
+                              children: [
+                                Center(
+                                  child: PlayersContainer(
+                                    activePlayerId: activePlayerId,
+                                    players: context
+                                            .read<GameBloc>()
+                                            .playerOrder
+                                            .isNotEmpty
+                                        ? playerOrder
+                                        : [],
+                                  ),
                                 ),
-                              ),
-                              Align(
-                                alignment: Alignment.bottomCenter,
-                                child: PlayerTurnInfo(player: activePlayer),
-                              ),
-                            ],
+                                Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const PlayDirection(clockwise: true),
+                                      PlayerTurnInfo(player: activePlayer),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-
                       Expanded(
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
@@ -63,7 +71,6 @@ class GameViewMobile extends StatelessWidget {
                           ),
                         ),
                       ),
-                      //const Divider(height: 8, endIndent: 50, indent: 50),
                       const Expanded(flex: 2, child: PlayerActions()),
                     ],
                   ),
@@ -72,23 +79,20 @@ class GameViewMobile extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: 40,
+            top: 10,
             left: 10,
-            child: FloatingActionButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+            child: SafeArea(
+              child: FloatingActionButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                mini: true,
+                onPressed: () {
+                  context.pop();
+                },
+                child: const Icon(Icons.close),
               ),
-              mini: true,
-              onPressed: () {
-                context.pop();
-              },
-              child: const Icon(Icons.close),
             ),
-          ),
-          const Positioned(
-            top: 40,
-            right: 10,
-            child: Card(child: PlayDirection()),
           ),
         ],
       ),

@@ -4,6 +4,7 @@ import 'package:cheaters_dice/constants.dart';
 import 'package:cheaters_dice/game/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class PlayerAvatar extends StatefulWidget {
   const PlayerAvatar({
@@ -70,6 +71,9 @@ class _PlayerAvatarState extends State<PlayerAvatar>
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
+        final shorterSide = constraints.maxHeight < constraints.maxWidth
+            ? constraints.maxHeight
+            : constraints.maxWidth;
         return BlocConsumer<GameBloc, GameState>(
           listener: (context, state) {
             if (state.status == GameStatus.revealing) {
@@ -94,7 +98,7 @@ class _PlayerAvatarState extends State<PlayerAvatar>
                 children: [
                   Expanded(
                     child: FittedBox(
-                      fit: BoxFit.scaleDown,
+                      fit: BoxFit.fitHeight,
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
@@ -106,33 +110,38 @@ class _PlayerAvatarState extends State<PlayerAvatar>
                         ),
                         child: CircleAvatar(
                           backgroundColor: Colors.white,
-                          maxRadius: constraints.maxWidth * 0.45,
+                          radius: shorterSide * 0.45,
                           child: ClipOval(
-                            child: CachedNetworkImage(
-                              imageUrl: widget.player.photo,
-                              placeholder: (context, url) =>
-                                  const CircularProgressIndicator(),
-                              errorWidget: (context, url, error) =>
-                                  const Icon(Icons.error),
-                            ),
+                            child: kIsWeb
+                                ? Image.network(widget.player.photo)
+                                : CachedNetworkImage(
+                                    imageUrl: widget.player.photo,
+                                    placeholder: (context, url) =>
+                                        const CircularProgressIndicator(),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(Icons.error),
+                                  ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                  AnimatedSwitcherPlus.translationTop(
-                    duration: _transitionDuration,
-                    child: !_shouldReveal
-                        ? _EmptyPlayerDice(
-                            key: const ValueKey('1'),
-                            widget: widget,
-                            constraints: constraints,
-                          )
-                        : _RevealedPlayerDice(
-                            key: const ValueKey('1'),
-                            widget: widget,
-                            constraints: constraints,
-                          ),
+                  FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child: AnimatedSwitcherPlus.translationTop(
+                      duration: _transitionDuration,
+                      child: !_shouldReveal
+                          ? _EmptyPlayerDice(
+                              key: const ValueKey('0'),
+                              widget: widget,
+                              constraints: constraints,
+                            )
+                          : _RevealedPlayerDice(
+                              key: const ValueKey('1'),
+                              widget: widget,
+                              constraints: constraints,
+                            ),
+                    ),
                   ),
                 ],
               ),
@@ -157,9 +166,13 @@ class _RevealedPlayerDice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final previousBid = context.read<GameBloc>().state.lastBid;
+    final shorterSide = constraints.maxHeight < constraints.maxWidth
+        ? constraints.maxHeight
+        : constraints.maxWidth;
 
     return Row(
       key: key,
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
         widget.player.dice.length,
@@ -169,7 +182,7 @@ class _RevealedPlayerDice extends StatelessWidget {
             fit: BoxFit.scaleDown,
             child: Dice(
               key: ValueKey(widget.player.dice[index].id),
-              size: constraints.maxHeight * 0.1,
+              size: shorterSide * 0.1,
               value: widget.player.dice[index].value,
               highlight: previousBid != null &&
                   (widget.player.dice[index].value == previousBid.value ||
@@ -194,18 +207,23 @@ class _EmptyPlayerDice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shorterSide = constraints.maxHeight < constraints.maxWidth
+        ? constraints.maxHeight
+        : constraints.maxWidth;
+
     return Row(
+      mainAxisSize: MainAxisSize.min,
       key: key,
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
         widget.player.dice.length,
         (index) => Container(
-          width: constraints.maxHeight * 0.1,
-          height: constraints.maxHeight * 0.1,
+          width: shorterSide * 0.1,
+          height: shorterSide * 0.1,
           decoration: BoxDecoration(
             border: Border.all(),
             borderRadius: BorderRadius.circular(
-              constraints.maxHeight * 0.02,
+              shorterSide * 0.02,
             ),
           ),
           margin: const EdgeInsets.all(4),

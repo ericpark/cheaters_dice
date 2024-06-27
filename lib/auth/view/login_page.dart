@@ -84,8 +84,8 @@ class LoginPage extends StatelessWidget {
               ),*/
             ],
             userValidator: (value) {
-              if (!value!.contains('@') || !value.endsWith('.com')) {
-                return "Email must contain '@' and end with '.com'";
+              if (!value!.contains('@') || !value.contains('.')) {
+                return "Email must contain '@' and end with a valid domain";
               }
               return null;
             },

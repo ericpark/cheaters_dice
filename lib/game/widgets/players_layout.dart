@@ -28,7 +28,7 @@ class _PlayersLayoutState extends State<PlayersLayout> {
   ) {
     final coordinates = <Widget>[];
 
-    const radius = 1.2; // adjust the radius as needed
+    const radius = 1.1; // adjust the radius as needed
     const centerX = 0.0; // adjust the center X coordinate as needed
     const centerY = 0.2; // adjust the center Y coordinate as needed
     const startAngle = 3.14159 / 2; // start angle at 3/2 pi
@@ -64,9 +64,10 @@ class _PlayersLayoutState extends State<PlayersLayout> {
       builder: (BuildContext context, BoxConstraints constraints) {
         return BlocBuilder<GameBloc, GameState>(
           builder: (context, state) {
-            final avatarSize = constraints.maxHeight > constraints.maxWidth
-                ? constraints.maxHeight * 0.3
-                : constraints.maxWidth * 0.2;
+            final shorterSide = constraints.maxHeight < constraints.maxWidth
+                ? constraints.maxHeight
+                : constraints.maxWidth;
+            final avatarSize = shorterSide * 0.35;
 
             final avatars =
                 calculateCircleCoordinates(numberOfPlayers, avatarSize)
