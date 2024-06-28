@@ -147,8 +147,9 @@ class _PlayerAvatarState extends State<PlayerAvatar>
                                       bottom: shorterSide * 0.08,
                                     ),
                                     child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text(widget.player.name ?? '')),
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(widget.player.name ?? ''),
+                                    ),
                                   ),
                                 ),
                               ],

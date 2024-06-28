@@ -11,9 +11,11 @@ class LobbyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: LobbyView(),
-      bottomNavigationBar: BottomBar(initialActiveIndex: 1),
+    return Scaffold(
+      primary: false,
+      body: const LobbyView(),
+      bottomNavigationBar: const BottomBar(initialActiveIndex: 1),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     );
   }
 }
@@ -32,23 +34,43 @@ class LobbyView extends StatelessWidget {
             return SuperScaffold(
               transitionBetweenRoutes: false,
               appBar: SuperAppBar(
-                title: const Text('LOBBIES'),
-                largeTitle: SuperLargeTitle(
-                  largeTitle: 'LOBBIES',
-                  actions: [
+                automaticallyImplyLeading: false,
+                titleSpacing: 0,
+                searchBar: SuperSearchBar(enabled: false),
+                backgroundColor:
+                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
+                leading: IconButton(
+                  icon: const Icon(Icons.filter_alt),
+                  iconSize: 22,
+                  onPressed: () {},
+                ),
+                actions: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     IconButton(
-                      icon: const Icon(Icons.add),
+                      icon: const Icon(Icons.refresh),
+                      iconSize: 22,
                       onPressed: () {},
+                    ),
+                    const SizedBox(
+                      width: 15,
                     ),
                   ],
                 ),
-                titleSpacing: 0,
-                shadowColor: Colors.grey,
-                searchBar: SuperSearchBar(
-                  enabled: false,
+                largeTitle: SuperLargeTitle(
+                  largeTitle: 'LOBBIES',
+                  actions: [
+                    SuperAction(
+                      child: TextButton(
+                        child: const Text('CREATE'),
+                        onPressed: () {},
+                      ),
+                    ),
+                  ],
                 ),
               ),
               body: ListView.builder(
+                padding: EdgeInsets.zero,
                 shrinkWrap: true,
                 itemCount: state.availableLobbies.length,
                 itemBuilder: (context, index) {

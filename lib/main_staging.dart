@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:game_repository/game_repository.dart';
+import 'package:leaderboard_repository/leaderboard_repository.dart';
 import 'package:lobby_repository/lobby_repository.dart';
 
 void main() async {
@@ -21,12 +22,14 @@ void main() async {
   );
   final db = FirebaseFirestore.instance;
   final lobbyRepository = LobbyRepository();
+  final leaderboardRepository = LeaderboardRepository();
 
   await bootstrap(
     () => App(
       authRepository: AuthRepository(firebaseDB: db),
       gameRepository: gameRepository,
       lobbyRepository: lobbyRepository,
+      leaderboardRepository: leaderboardRepository,
     ),
   );
 }

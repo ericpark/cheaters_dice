@@ -7,13 +7,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:game_repository/game_repository.dart';
+import 'package:leaderboard_repository/leaderboard_repository.dart';
 import 'package:lobby_repository/lobby_repository.dart';
 
 void main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-
-  //await gameRepository.init(useDummy: true);
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -21,14 +20,14 @@ void main() async {
   final db = FirebaseFirestore.instance;
   final gameRepository = GameRepository();
   final lobbyRepository = LobbyRepository();
-
-  //print(await gameRepository.getGameById(gameId: '46hOQ2pQ26C4aIx6iAWF'));
+  final leaderboardRepository = LeaderboardRepository();
 
   await bootstrap(
     () => App(
       authRepository: AuthRepository(firebaseDB: db),
       gameRepository: gameRepository,
       lobbyRepository: lobbyRepository,
+      leaderboardRepository: leaderboardRepository,
     ),
   );
 }
