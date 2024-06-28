@@ -110,7 +110,8 @@ class LeaderboardTile extends StatelessWidget {
                 ? Colors.brown
                 : Colors.transparent;
 
-    final winPercentage = player.wins / (player.games > 0 ? player.games : 1);
+    final winPercentage =
+        player.wins / (player.games > 0 ? player.games : 1) * 100;
 
     return Card(
       clipBehavior: Clip.hardEdge,
@@ -169,7 +170,7 @@ class LeaderboardTile extends StatelessWidget {
                         const Text(' | '),
                         Text('L: ${player.games - player.wins}'),
                         const Text(' | '),
-                        Text('$winPercentage %'),
+                        Text('${winPercentage.toStringAsFixed(1)} %'),
                       ],
                     ),
                   ],
