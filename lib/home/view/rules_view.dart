@@ -52,10 +52,10 @@ class RulesModal {
           _pagePadding,
           _pagePadding,
           _pagePadding,
-          _pagePadding,
+          _pagePadding + _buttonHeight,
         ),
         child: SizedBox(
-          height: MediaQuery.sizeOf(context).height * 0.7,
+          height: MediaQuery.sizeOf(context).height * 0.6,
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,10 +154,10 @@ class RulesModal {
           _pagePadding,
           _pagePadding,
           _pagePadding,
-          _pagePadding,
+          _pagePadding + _buttonHeight,
         ),
         child: SizedBox(
-          height: MediaQuery.sizeOf(context).height * 0.7,
+          height: MediaQuery.sizeOf(modalSheetContext).height * 0.6,
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,6 +208,28 @@ class RulesModal {
 - If the bid is not met, the bidder loses one die.''',
                   style: textTheme.bodyMedium,
                 ),
+                const SizedBox(height: 16),
+                Text(
+                  'Continuing the Game:',
+                  style: textTheme.headlineLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '''
+- After a challenge, the dice are re-hidden, and the loser of the challenge starts a new round with a new bid.
+- Players continue in this fashion until only one player has dice remaining.''',
+                  style: textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Winning:',
+                  style: textTheme.headlineLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'The last player with any dice remaining is the winner.',
+                  style: textTheme.bodyMedium,
+                ),
               ],
             ),
           ),
@@ -245,7 +267,7 @@ class RulesModal {
           ],
         ),
       ),
-      topBarTitle: Text('Setup', style: textTheme.titleSmall),
+      topBarTitle: Text('Good to know', style: textTheme.titleSmall),
       isTopBarLayerAlwaysVisible: true,
       trailingNavBarWidget: IconButton(
         padding: const EdgeInsets.all(_pagePadding),
@@ -257,10 +279,10 @@ class RulesModal {
           _pagePadding,
           _pagePadding,
           _pagePadding,
-          _pagePadding,
+          _pagePadding + _buttonHeight,
         ),
         child: SizedBox(
-          height: MediaQuery.sizeOf(context).height * 0.7,
+          height: MediaQuery.sizeOf(context).height * 0.6,
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
