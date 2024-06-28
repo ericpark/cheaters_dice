@@ -22,7 +22,7 @@ class SpecialModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SliverWoltModalSheetPage bidPage(
+    SliverWoltModalSheetPage specialPage(
       BuildContext modalSheetContext,
       TextTheme textTheme,
     ) {
@@ -173,7 +173,7 @@ class SpecialModal extends StatelessWidget {
                     pageListBuilder: (modalSheetContext) {
                       final textTheme = Theme.of(context).textTheme;
                       return [
-                        bidPage(modalSheetContext, textTheme),
+                        specialPage(modalSheetContext, textTheme),
                       ];
                     },
                     modalTypeBuilder: (context) {

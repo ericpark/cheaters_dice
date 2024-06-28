@@ -1,6 +1,5 @@
 import 'package:cheaters_dice/app/widgets/widgets.dart';
-import 'package:cheaters_dice/home/widgets/banner_tile.dart';
-import 'package:cheaters_dice/home/widgets/introduction_tile.dart';
+import 'package:cheaters_dice/home/home.dart';
 import 'package:cheaters_dice/lobby/lobby.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
